@@ -30,6 +30,7 @@ export default async function CertificatePage({ params }) {
       <p>証書No: {certificateData['CNo']}</p>
       <p>鑑別結果: {certificateData['Conclusion']}</p>
       <p>形状: {certificateData['Shape_Cut']}</p>
+      <p>重量: {certificateData['Weight']}</p>
     </div>
   );
 }
