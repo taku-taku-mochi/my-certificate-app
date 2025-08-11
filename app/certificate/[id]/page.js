@@ -38,10 +38,6 @@ async function getData(id) {
   return data.records;
 }
 
-export default async function CertificatePage({ params }) {
-  const records = await getData(params.id);
-  // ... JSXを返す部分 ...
-}
 
 // ... ページコンポーネントはそのまま
 
