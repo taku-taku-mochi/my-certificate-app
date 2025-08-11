@@ -78,82 +78,100 @@ export default async function CertificatePage({ params }) {
     errorMessage = 'データの取得中にエラーが発生しました。しばらくしてからもう一度お試しください。';
   }
 
-  // --- スタイル定義 (画像付き・モダンライトテーマ) ---
+  // --- スタイル定義 (提供されたHTML参考) ---
   const pageStyles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
-    backgroundColor: '#2c3e50',
-    fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-    padding: '2rem',
+    backgroundColor: '#f1f5f9', // bg-gray-100
+    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+    padding: '1rem',
   };
 
-  const certificateStyles = {
+  const cardStyles = {
     width: '100%',
-    maxWidth: '800px', // 横幅を広げて画像スペースを確保
-    borderRadius: '16px',
+    maxWidth: '448px', // max-w-md
     backgroundColor: '#ffffff',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-    overflow: 'hidden', // 角丸を維持するため
-  };
-  
-  const contentWrapperStyles = {
-      display: 'flex',
-      flexDirection: 'row', // 横並びのレイアウト
-  };
-  
-  const imageContainerStyles = {
-      flex: '1 1 40%', // 左側の画像エリアの幅
-      backgroundColor: '#f9f9f9',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '2rem',
-      position: 'relative',
-  };
-
-  const imageStyles = {
-      width: '100%',
-      height: 'auto',
-      maxHeight: '400px',
-      objectFit: 'contain',
-  };
-
-  const detailsContainerStyles = {
-      flex: '1 1 60%', // 右側の詳細エリアの幅
-      padding: '2.5rem 3.5rem',
+    borderRadius: '0.5rem', // rounded-lg
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', // shadow-xl
+    padding: '2.5rem', // p-8から上下の余白を増やす
   };
 
   const headerStyles = {
-    textAlign: 'left',
-    fontSize: '2rem',
-    fontWeight: '600',
-    color: '#2c3e50',
-    borderBottom: '1px solid #eaeaea',
-    paddingBottom: '1.5rem',
-    marginBottom: '2rem',
+    textAlign: 'center',
+    marginBottom: '1.5rem', // mb-6
+  };
+
+  const titleStyles = {
+    fontSize: '1.5rem', // text-2xl
+    fontWeight: 'bold',
+    color: '#1f2937', // text-gray-800
+  };
+
+  const idStyles = {
+    fontSize: '0.875rem', // text-sm
+    color: '#6b7280', // text-gray-500
+    marginTop: '0.25rem', // mt-1
   };
   
+  const imageContainerStyles = {
+    marginBottom: '1.5rem', // mb-6
+  };
+
+  const imageStyles = {
+    width: '100%',
+    height: 'auto',
+    borderRadius: '0.5rem', // rounded-lg
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', // shadow-md
+  };
+
+  const detailsContainerStyles = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem', // space-y-4
+  };
+
   const itemStyles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '1.2rem 0',
-    borderBottom: '1px solid #f0f0f0',
-    fontSize: '1rem',
+    borderBottom: '1px solid #e5e7eb', // border-b
+    paddingBottom: '0.5rem', // pb-2
   };
-
+  
   const labelStyles = {
-    fontWeight: '500',
-    color: '#555',
+    fontWeight: '600', // font-semibold
+    color: '#4b5563', // text-gray-600
   };
 
   const valueStyles = {
-    fontWeight: '400',
-    color: '#333',
+    color: '#1f2937', // text-gray-800
+    fontWeight: '500', // font-medium
+  };
+
+  const conclusionValueStyles = {
+    ...valueStyles,
+    fontSize: '1.2rem', // フォントを少し大きくする
   };
   
+  const commentContainerStyles = {
+    // No direct equivalent for space-y-4 on the parent, so handle margin individually
+  };
+
+  const commentLabelStyles = {
+    fontWeight: '600',
+    color: '#4b5563',
+  };
+
+  const commentTextStyles = {
+    backgroundColor: '#f9fafb', // bg-gray-50
+    padding: '0.75rem', // p-3
+    borderRadius: '0.375rem', // rounded-md
+    marginTop: '0.25rem', // mt-1
+    color: '#1f2937',
+  };
+
   const errorContainerStyles = {
     textAlign: 'center',
     padding: '2rem',
@@ -162,7 +180,7 @@ export default async function CertificatePage({ params }) {
   };
 
   const errorStyles = {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff0f0',
     color: '#d8000c',
     padding: '3rem',
     borderRadius: '16px',
@@ -173,44 +191,41 @@ export default async function CertificatePage({ params }) {
   // 鑑定書が見つかった場合の表示
   if (certificateData) {
     const fields = certificateData.fields;
-    // Airtableの添付ファイルフィールドから画像のURLを取得
-    const imageUrl = fields.Image && fields.Image.length > 0 ? fields.Image[0].url : null;
+    const imageUrl = fields.Image && fields.Image.length > 0 ? fields.Image[0].url : 'https://placehold.co/600x400/e2e8f0/a0aec0?text=No+Image';
 
     return (
       <main style={pageStyles}>
-        <div style={certificateStyles}>
-          <div style={contentWrapperStyles}>
-            {/* 左側の画像エリア */}
-            <div style={imageContainerStyles}>
-              {imageUrl ? (
-                <img src={imageUrl} alt={fields.Hinmei || 'Gemstone'} style={imageStyles} />
-              ) : (
-                <div style={{color: '#ccc'}}>画像なし</div>
-              )}
+        <div style={cardStyles}>
+          <div style={headerStyles}>
+            <h1 style={titleStyles}>Certificate Data</h1>
+            <p style={idStyles}>- Certificate No: {fields.CNo || 'N/A'} -</p>
+          </div>
+
+          <div style={imageContainerStyles}>
+            <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={imageStyles} />
+          </div>
+
+          <div style={detailsContainerStyles}>
+            <div style={itemStyles}>
+              <span style={labelStyles}>Conclusion:</span>
+              <span style={conclusionValueStyles}>{fields.Conclusion || 'N/A'}</span>
+            </div>
+            <div style={itemStyles}>
+              <span style={labelStyles}>Weight:</span>
+              <span style={valueStyles}>{fields.Weight || 'N/A'}</span>
+            </div>
+            <div style={itemStyles}>
+              <span style={labelStyles}>Shape & Cut:</span>
+              <span style={valueStyles}>{fields.Shape_Cut || 'N/A'}</span>
             </div>
             
-            {/* 右側の詳細エリア */}
-            <div style={detailsContainerStyles}>
-              <h1 style={headerStyles}>宝石鑑別書</h1>
-              <div>
-                <div style={itemStyles}>
-                  <span style={labelStyles}>証書No:</span>
-                  <span style={valueStyles}>{fields.CNo || 'N/A'}</span>
-                </div>
-                <div style={itemStyles}>
-                  <span style={labelStyles}>鑑別結果:</span>
-                  <span style={valueStyles}>{fields.Conclusion || 'N/A'}</span>
-                </div>
-                <div style={itemStyles}>
-                  <span style={labelStyles}>形状:</span>
-                  <span style={valueStyles}>{fields.Shape_Cut || 'N/A'}</span>
-                </div>
-                <div style={itemStyles}>
-                  <span style={labelStyles}>重量:</span>
-                  <span style={valueStyles}>{fields.Weight || 'N/A'}</span>
-                </div>
+            {/* コメントがある場合のみ、このブロック全体を表示 */}
+            {fields.Comment && (
+              <div style={commentContainerStyles}>
+                <span style={commentLabelStyles}>Comment:</span>
+                <p style={commentTextStyles}>{fields.Comment}</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>
