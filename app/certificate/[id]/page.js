@@ -18,6 +18,8 @@ async function getCertificateData(id) {
   return data;
 }
 
+// ... ページコンポーネントはそのまま
+
 export default async function CertificatePage({ params }) {
   let certificateData = null;
   try {
