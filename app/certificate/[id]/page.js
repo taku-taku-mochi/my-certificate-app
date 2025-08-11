@@ -78,36 +78,61 @@ export default async function CertificatePage({ params }) {
     errorMessage = 'データの取得中にエラーが発生しました。しばらくしてからもう一度お試しください。';
   }
 
-  // --- スタイル定義 (モダン・ライトテーマ) ---
+  // --- スタイル定義 (画像付き・モダンライトテーマ) ---
   const pageStyles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
-    backgroundColor: '#2c3e50', // 背景をダークカラーに変更
+    backgroundColor: '#2c3e50',
     fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-    color: '#333',
-    padding: '1rem',
+    padding: '2rem',
   };
 
   const certificateStyles = {
     width: '100%',
-    maxWidth: '600px',
-    padding: '2.5rem 3.5rem',
-    border: '1px solid #e0e0e0',
-    borderRadius: '12px',
+    maxWidth: '800px', // 横幅を広げて画像スペースを確保
+    borderRadius: '16px',
     backgroundColor: '#ffffff',
-    boxShadow: '0 6px 24px rgba(0, 0, 0, 0.07)',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+    overflow: 'hidden', // 角丸を維持するため
+  };
+  
+  const contentWrapperStyles = {
+      display: 'flex',
+      flexDirection: 'row', // 横並びのレイアウト
+  };
+  
+  const imageContainerStyles = {
+      flex: '1 1 40%', // 左側の画像エリアの幅
+      backgroundColor: '#f9f9f9',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '2rem',
+      position: 'relative',
+  };
+
+  const imageStyles = {
+      width: '100%',
+      height: 'auto',
+      maxHeight: '400px',
+      objectFit: 'contain',
+  };
+
+  const detailsContainerStyles = {
+      flex: '1 1 60%', // 右側の詳細エリアの幅
+      padding: '2.5rem 3.5rem',
   };
 
   const headerStyles = {
-    textAlign: 'center',
+    textAlign: 'left',
     fontSize: '2rem',
     fontWeight: '600',
     color: '#2c3e50',
     borderBottom: '1px solid #eaeaea',
     paddingBottom: '1.5rem',
-    marginBottom: '2.5rem',
+    marginBottom: '2rem',
   };
   
   const itemStyles = {
@@ -128,7 +153,7 @@ export default async function CertificatePage({ params }) {
     fontWeight: '400',
     color: '#333',
   };
-
+  
   const errorContainerStyles = {
     textAlign: 'center',
     padding: '2rem',
@@ -137,37 +162,54 @@ export default async function CertificatePage({ params }) {
   };
 
   const errorStyles = {
-    backgroundColor: '#fff0f0',
+    backgroundColor: '#ffffff',
     color: '#d8000c',
-    padding: '2rem',
-    borderRadius: '12px',
-    border: '1px solid #ffbaba',
+    padding: '3rem',
+    borderRadius: '16px',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
   };
 
 
   // 鑑定書が見つかった場合の表示
   if (certificateData) {
     const fields = certificateData.fields;
+    // Airtableの添付ファイルフィールドから画像のURLを取得
+    const imageUrl = fields.Image && fields.Image.length > 0 ? fields.Image[0].url : null;
+
     return (
       <main style={pageStyles}>
         <div style={certificateStyles}>
-          <h1 style={headerStyles}>宝石鑑別書</h1>
-          <div>
-            <div style={itemStyles}>
-              <span style={labelStyles}>証書No:</span>
-              <span style={valueStyles}>{fields.CNo || 'N/A'}</span>
+          <div style={contentWrapperStyles}>
+            {/* 左側の画像エリア */}
+            <div style={imageContainerStyles}>
+              {imageUrl ? (
+                <img src={imageUrl} alt={fields.Hinmei || 'Gemstone'} style={imageStyles} />
+              ) : (
+                <div style={{color: '#ccc'}}>画像なし</div>
+              )}
             </div>
-            <div style={itemStyles}>
-              <span style={labelStyles}>鑑別結果:</span>
-              <span style={valueStyles}>{fields.Conclusion || 'N/A'}</span>
-            </div>
-            <div style={itemStyles}>
-              <span style={labelStyles}>形状:</span>
-              <span style={valueStyles}>{fields.Shape_Cut || 'N/A'}</span>
-            </div>
-            <div style={itemStyles}>
-              <span style={labelStyles}>重量:</span>
-              <span style={valueStyles}>{fields.Weight || 'N/A'}</span>
+            
+            {/* 右側の詳細エリア */}
+            <div style={detailsContainerStyles}>
+              <h1 style={headerStyles}>宝石鑑別書</h1>
+              <div>
+                <div style={itemStyles}>
+                  <span style={labelStyles}>証書No:</span>
+                  <span style={valueStyles}>{fields.CNo || 'N/A'}</span>
+                </div>
+                <div style={itemStyles}>
+                  <span style={labelStyles}>鑑別結果:</span>
+                  <span style={valueStyles}>{fields.Conclusion || 'N/A'}</span>
+                </div>
+                <div style={itemStyles}>
+                  <span style={labelStyles}>形状:</span>
+                  <span style={valueStyles}>{fields.Shape_Cut || 'N/A'}</span>
+                </div>
+                <div style={itemStyles}>
+                  <span style={labelStyles}>重量:</span>
+                  <span style={valueStyles}>{fields.Weight || 'N/A'}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
