@@ -1,6 +1,6 @@
 // --- データ取得関数 ---
 // この関数はサーバーサイドでのみ実行されます。
-async function getCertificateData(recordId) {
+const getCertificateData = async (recordId) => {
   // 1. 環境変数が読み込まれているかを確認
   const baseId = process.env.AIRTABLE_BASE_ID;
   const tableId = process.env.AIRTABLE_TABLE_ID;
@@ -14,7 +14,7 @@ async function getCertificateData(recordId) {
 
   // 2. 環境変数が一つでも欠けていたら、エラーを投げて処理を中断
   if (!baseId || !tableId || !apiKey) {
-    const errorMessage = 'Server configuration error: Environment variables are missing. Please check your .env.local file.';
+    const errorMessage = 'Server configuration error: Environment variables are missing.';
     console.error(`[FATAL ERROR] ${errorMessage}`);
     throw new Error(errorMessage);
   }
@@ -38,10 +38,9 @@ async function getCertificateData(recordId) {
 
     // 5. レスポンスが正常でない場合 (404 Not Foundなど)
     if (!response.ok) {
-      // レコードが見つからない場合、Airtableは404を返すので、ここで捕捉される
       const errorData = await response.json();
       console.error('[API ERROR] Airtable responded with an error:', JSON.stringify(errorData, null, 2));
-      return null; // データが見つからなかった場合はnullを返す
+      return null;
     }
 
     // 6. レスポンスをJSONとして解析
@@ -55,10 +54,10 @@ async function getCertificateData(recordId) {
   } catch (error) {
     console.error('--- [CRITICAL FETCH ERROR] ---');
     console.error('Failed to fetch from Airtable. This could be a network issue, DNS problem, or incorrect URL.');
-    console.error(error); // エラーオブジェクト全体をログに出力
+    console.error(error);
     throw error;
   }
-}
+};
 
 
 // --- ページコンポーネント ---
