@@ -39,6 +39,7 @@ export async function GET(request, { params }) {
         Conclusion: data.fields.Conclusion,
         Shape_Cut: data.fields.Shape_Cut,
         Comment: data.fields.Comment,
+        Weight: data.fields.Weight, // ★ この行を追加してWeightも翻訳対象に
       };
 
       // 翻訳対象のフィールドが存在する場合のみAIを呼び出す
