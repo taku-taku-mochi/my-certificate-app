@@ -1,6 +1,8 @@
 // app/certificate/[id]/page.js
+
 async function getCertificateData(id) {
-  const res = await fetch(`http://localhost:3000/api/certificate?id=${id}`, {
+  // fetch の URL を相対パスに修正
+  const res = await fetch(`/api/certificate?id=${id}`, {
     cache: 'no-store'
   });
   
