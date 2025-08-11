@@ -1,65 +1,105 @@
-// app/certificate/[id]/page.js
-
-async function getData(id) {
-  // --- ▼ここからデバッグログ▼ ---
-  console.log(`[DEBUG] Function started for ID: ${id}`);
-  
+// --- データ取得関数 ---
+// この関数はサーバーサイドでのみ実行されます。
+async function getCertificateData(recordId) {
+  // 1. 環境変数が読み込まれているかを確認
   const baseId = process.env.AIRTABLE_BASE_ID;
   const tableId = process.env.AIRTABLE_TABLE_ID;
   const apiKey = process.env.AIRTABLE_API_KEY;
 
-  console.log(`[DEBUG] AIRTABLE_BASE_ID: ${baseId}`);
-  console.log(`[DEBUG] AIRTABLE_TABLE_ID: ${tableId}`);
-  console.log(`[DEBUG] AIRTABLE_API_KEY is loaded: ${!!apiKey}`); // APIキー自体は表示せず、存在するか否かだけ確認
-  // --- ▲ここまでデバッグログ▲ ---
+  console.log('--- [Step 1] getCertificateData started ---');
+  console.log(`Fetching by Record ID: ${recordId}`);
+  console.log(`Base ID loaded: ${!!baseId}`);
+  console.log(`Table ID loaded: ${!!tableId}`);
+  console.log(`API Key loaded: ${!!apiKey}`);
 
-  // 環境変数が一つでもなければ、エラーを投げて処理を中断
+  // 2. 環境変数が一つでも欠けていたら、エラーを投げて処理を中断
   if (!baseId || !tableId || !apiKey) {
-    console.error('[ERROR] Environment variables are missing!');
-    throw new Error('Server configuration error: Missing environment variables.');
+    const errorMessage = 'Server configuration error: Environment variables are missing. Please check your .env.local file.';
+    console.error(`[FATAL ERROR] ${errorMessage}`);
+    throw new Error(errorMessage);
   }
 
-  const fetchUrl = `https://api.airtable.com/v0/${baseId}/${tableId}?filterByFormula={CNo}='${id}'`;
-  console.log(`[DEBUG] Fetching URL: ${fetchUrl}`);
+  // 3. AirtableにリクエストするURLを組み立て（レコードIDで直接取得）
+  const fetchUrl = `https://api.airtable.com/v0/${baseId}/${tableId}/${recordId}`;
+  console.log(`--- [Step 2] Fetching URL ---`);
+  console.log(fetchUrl);
 
-  const res = await fetch(fetchUrl, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-    next: { revalidate: 10 } //キャッシュの秒数
-  });
+  try {
+    // 4. Airtable APIにリクエストを送信
+    const response = await fetch(fetchUrl, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      cache: 'no-store',
+    });
 
-  if (!res.ok) {
-    console.error(`[ERROR] Airtable API responded with status: ${res.status}`);
-    throw new Error('Failed to fetch data');
+    console.log(`--- [Step 3] Airtable API Response Status ---`);
+    console.log(`Status: ${response.status} ${response.statusText}`);
+
+    // 5. レスポンスが正常でない場合 (404 Not Foundなど)
+    if (!response.ok) {
+      // レコードが見つからない場合、Airtableは404を返すので、ここで捕捉される
+      const errorData = await response.json();
+      console.error('[API ERROR] Airtable responded with an error:', JSON.stringify(errorData, null, 2));
+      return null; // データが見つからなかった場合はnullを返す
+    }
+
+    // 6. レスポンスをJSONとして解析
+    const data = await response.json();
+    console.log('--- [Step 4] Airtable API Response Data ---');
+    console.log(JSON.stringify(data, null, 2));
+
+    // 7. 取得したレコードデータを返す
+    return data;
+
+  } catch (error) {
+    console.error('--- [CRITICAL FETCH ERROR] ---');
+    console.error('Failed to fetch from Airtable. This could be a network issue, DNS problem, or incorrect URL.');
+    console.error(error); // エラーオブジェクト全体をログに出力
+    throw error;
   }
-
-  const data = await res.json();
-  return data.records;
 }
 
 
-// ... ページコンポーネントはそのまま
-
+// --- ページコンポーネント ---
+// このコンポーネントがページのUIを描画します。
 export default async function CertificatePage({ params }) {
+  console.log('--- Page component rendering ---');
   let certificateData = null;
+  let errorMessage = '';
+
   try {
+    // サーバーサイドでデータ取得関数を呼び出す
     certificateData = await getCertificateData(params.id);
+    if (!certificateData) {
+      errorMessage = '鑑定書が見つかりません。IDまたはQRコードが正しいかご確認ください。';
+    }
   } catch (error) {
-    console.error(error);
+    console.error('Error in CertificatePage:', error.message);
+    errorMessage = 'データの取得中にエラーが発生しました。しばらくしてからもう一度お試しください。';
   }
 
-  if (!certificateData || !certificateData['CNo']) {
-    return <div>鑑定書が見つかりません。</div>;
+  // 鑑定書が見つかった場合の表示
+  if (certificateData) {
+    const fields = certificateData.fields;
+    return (
+      <div style={{ fontFamily: 'sans-serif', padding: '2rem', border: '1px solid #ccc', margin: '2rem', borderRadius: '8px' }}>
+        <h1 style={{textAlign: 'center', borderBottom: '2px solid #eee', paddingBottom: '1rem'}}>宝石鑑別書</h1>
+        <div style={{ padding: '1rem 0' }}>
+            <p><strong>証書No:</strong> {fields.CNo || 'N/A'}</p>
+            <p><strong>鑑別結果:</strong> {fields.Conclusion || 'N/A'}</p>
+            <p><strong>形状:</strong> {fields.Shape_Cut || 'N/A'}</p>
+            <p><strong>重量:</strong> {fields.Weight || 'N/A'}</p>
+        </div>
+      </div>
+    );
   }
 
+  // エラーまたはデータが見つからない場合の表示
   return (
-    <div>
-      <h1>宝石鑑別書</h1>
-      <p>証書No: {certificateData['CNo']}</p>
-      <p>鑑別結果: {certificateData['Conclusion']}</p>
-      <p>形状: {certificateData['Shape_Cut']}</p>
-      <p>重量: {certificateData['Weight']}</p>
+    <div style={{ fontFamily: 'sans-serif', padding: '2rem', color: 'red', textAlign: 'center' }}>
+      <h1>エラー</h1>
+      <p>{errorMessage}</p>
     </div>
   );
 }
