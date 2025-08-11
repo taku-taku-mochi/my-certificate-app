@@ -1,8 +1,12 @@
 // app/certificate/[id]/page.js
 
 async function getCertificateData(id) {
-  // fetch の URL を相対パスに修正
-  const res = await fetch(`/api/certificate?id=${id}`, {
+  // 環境変数を使ってホスト名を取得
+  const host = process.env.NEXT_PUBLIC_VERCEL_URL ? 
+    `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 
+    'http://localhost:3000';
+
+  const res = await fetch(`${host}/api/certificate?id=${id}`, {
     cache: 'no-store'
   });
   
