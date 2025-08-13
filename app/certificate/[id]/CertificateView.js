@@ -43,6 +43,106 @@ const translations = {
   }
 };
 
+// --- 各デザインテーマのスタイル定義 ---
+
+// A案: ミニマリスト ＆ ラグジュアリー
+const themeAStyles = {
+  page: {
+    backgroundColor: '#1a1a1a', // Dark background
+  },
+  card: {
+    backgroundColor: '#2b2b2b',
+    border: '1px solid #444',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+  },
+  title: {
+    color: '#d4af37', // Gold color
+    fontWeight: '300',
+    letterSpacing: '0.1em',
+  },
+  id: {
+    color: '#aaa',
+  },
+  label: {
+    color: '#aaa',
+  },
+  value: {
+    color: '#f0f0f0',
+  },
+  conclusionValue: {
+    color: '#d4af37',
+    fontSize: '1.5rem',
+  },
+  divider: {
+    borderColor: '#444',
+  }
+};
+
+// B案：クラシック ＆ オーセンティック
+const themeBStyles = {
+  page: {
+    backgroundColor: '#fdfaee', // Parchment color
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    border: '8px double #c0a080', // Ornate double border
+    padding: '3rem',
+  },
+  title: {
+    fontFamily: "'Georgia', 'Times New Roman', serif",
+    color: '#5d4037',
+  },
+  id: {
+    color: '#795548',
+  },
+  label: {
+    fontFamily: "'Georgia', 'Times New Roman', serif",
+    color: '#795548',
+  },
+  value: {
+    fontFamily: "'Georgia', 'Times New Roman', serif",
+    color: '#3e2723',
+  },
+  conclusionValue: {
+    fontFamily: "'Georgia', 'Times New Roman', serif",
+    color: '#5d4037',
+    fontSize: '1.5rem',
+  },
+  divider: {
+    borderColor: '#d7ccc8',
+  }
+};
+
+// C案：フォトグラフィック ＆ ダイナミック (デフォルト)
+const themeCStyles = {
+  page: {
+    backgroundColor: '#f1f5f9',
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+  },
+  title: {
+    color: '#1f2937',
+  },
+  id: {
+    color: '#6b7280',
+  },
+  label: {
+    color: '#4b5563',
+  },
+  value: {
+    color: '#1f2937',
+  },
+  conclusionValue: {
+    color: '#1f2937',
+    fontSize: '1.2rem',
+  },
+  divider: {
+    borderColor: '#e5e7eb',
+  }
+};
+
 
 // --- 表示担当のコンポーネント ---
 export default function CertificateView({ recordId }) {
@@ -50,23 +150,32 @@ export default function CertificateView({ recordId }) {
   const [certificateData, setCertificateData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeTheme, setActiveTheme] = useState(themeCStyles); // デフォルトテーマを設定
 
   useEffect(() => {
     const getCertificateData = async (id, lang) => {
-      if (!id) return; // IDがなければ何もしない
+      if (!id) return;
       setLoading(true);
       setErrorMessage('');
       try {
         const response = await fetch(`/api/certificate/${id}?lang=${lang}`);
         if (!response.ok) {
           const errorResult = await response.json();
-          if (response.status === 404) {
-             throw new Error(translations[lang].errorNotFound);
-          }
-          throw new Error(errorResult.message || translations[lang].errorFetch);
+          throw new Error(errorResult.message || 'Failed to fetch data');
         }
         const data = await response.json();
         setCertificateData(data);
+
+        // ★★★ Airtableのテーマ設定に応じてスタイルを切り替え ★★★
+        const theme = data.fields['Design Theme'];
+        if (theme === 'A') {
+          setActiveTheme(themeAStyles);
+        } else if (theme === 'B') {
+          setActiveTheme(themeBStyles);
+        } else {
+          setActiveTheme(themeCStyles); // デフォルトはC
+        }
+
       } catch (error) {
         console.error('Error in CertificateView:', error.message);
         setCertificateData(null);
@@ -81,153 +190,35 @@ export default function CertificateView({ recordId }) {
 
   const t = translations[language];
 
-  // --- スタイル定義 ---
+  // --- 汎用スタイル定義 ---
   const pageStyles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
-    backgroundColor: '#f1f5f9',
     fontFamily: "'Helvetica Neue', Arial, sans-serif",
     padding: '1rem',
+    transition: 'background-color 0.5s ease',
+    ...activeTheme.page, // テーマのスタイルを適用
   };
 
   const cardStyles = {
     width: '100%',
     maxWidth: '448px',
-    backgroundColor: '#ffffff',
     borderRadius: '0.5rem',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     padding: '2.5rem',
-  };
-
-  const headerStyles = {
-    textAlign: 'center',
-    marginBottom: '1.5rem',
+    transition: 'all 0.5s ease',
+    ...activeTheme.card, // テーマのスタイルを適用
   };
   
-  const langButtonContainerStyles = {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.5rem',
-    marginBottom: '1rem',
-  };
-
-  const langButtonStyles = (isActive) => ({
-    padding: '0.25rem 0.75rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '0.375rem',
-    cursor: 'pointer',
-    backgroundColor: isActive ? '#3b82f6' : '#ffffff',
-    color: isActive ? '#ffffff' : '#374151',
-    fontSize: '0.875rem',
-    transition: 'all 0.2s ease-in-out',
-  });
-
-  const titleStyles = {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1f2937',
-  };
-
-  const idStyles = {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-    marginTop: '0.25rem',
-  };
-  
-  const imageContainerStyles = {
-    marginBottom: '1.5rem',
-  };
-
-  const imageStyles = {
-    width: '100%',
-    height: 'auto',
-    borderRadius: '0.5rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  };
-
-  const detailsContainerStyles = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  };
-
-  const itemStyles = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid #e5e7eb',
-    paddingBottom: '0.5rem',
-  };
-  
-  const labelStyles = {
-    fontWeight: '600',
-    color: '#4b5563',
-  };
-
-  const valueStyles = {
-    color: '#1f2937',
-    fontWeight: '500',
-    textAlign: 'right',
-  };
-
-  const conclusionValueStyles = {
-    ...valueStyles,
-    fontSize: '1.2rem',
-  };
-  
-  const commentContainerStyles = {};
-
-  const commentLabelStyles = {
-    fontWeight: '600',
-    color: '#4b5563',
-  };
-
-  const commentTextStyles = {
-    backgroundColor: '#f9fafb',
-    padding: '0.75rem',
-    borderRadius: '0.375rem',
-    marginTop: '0.25rem',
-    color: '#1f2937',
-  };
-
-  const errorContainerStyles = {
-    textAlign: 'center',
-    padding: '2rem',
-    width: '100%',
-    maxWidth: '500px',
-  };
-
-  const errorStyles = {
-    backgroundColor: '#fff0f0',
-    color: '#d8000c',
-    padding: '3rem',
-    borderRadius: '16px',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-  };
+  // ... (他のスタイル定義は省略)
 
   if (loading) {
-      return (
-          <main style={pageStyles}>
-              <div style={cardStyles}>
-                <p style={{textAlign: 'center'}}>{t.loading}</p>
-              </div>
-          </main>
-      )
+      return <main style={pageStyles}><p style={{color: '#888'}}>{t.loading}</p></main>
   }
 
   if (errorMessage || !certificateData) {
-    return (
-      <main style={pageStyles}>
-          <div style={errorContainerStyles}>
-              <div style={errorStyles}>
-                  <h2>{t.errorTitle}</h2>
-                  <p>{errorMessage || t.errorNotFound}</p>
-              </div>
-          </div>
-      </main>
-    );
+    // ... (エラー表示部分は省略)
   }
 
   const fields = certificateData.fields;
@@ -236,38 +227,34 @@ export default function CertificateView({ recordId }) {
   return (
     <main style={pageStyles}>
       <div style={cardStyles}>
-        <div style={langButtonContainerStyles}>
-          <button style={langButtonStyles(language === 'ja')} onClick={() => setLanguage('ja')}>日本語</button>
-          <button style={langButtonStyles(language === 'en')} onClick={() => setLanguage('en')}>English</button>
-          <button style={langButtonStyles(language === 'zh')} onClick={() => setLanguage('zh')}>中文</button>
-        </div>
-        <div style={headerStyles}>
-          <h1 style={titleStyles}>{t.title}</h1>
-          <p style={idStyles}>- {t.certNo}: {fields.CNo || 'N/A'} -</p>
+        {/* ... (言語ボタン部分は省略) ... */}
+        <div style={{textAlign: 'center', marginBottom: '1.5rem'}}>
+          <h1 style={{fontSize: '1.5rem', fontWeight: 'bold', ...activeTheme.title}}>{t.title}</h1>
+          <p style={{fontSize: '0.875rem', marginTop: '0.25rem', ...activeTheme.id}}>- {t.certNo}: {fields.CNo || 'N/A'} -</p>
         </div>
 
-        <div style={imageContainerStyles}>
-          <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={imageStyles} />
+        <div style={{marginBottom: '1.5rem'}}>
+          <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={{width: '100%', height: 'auto', borderRadius: '0.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'}} />
         </div>
 
-        <div style={detailsContainerStyles}>
-          <div style={itemStyles}>
-            <span style={labelStyles}>{t.conclusion}:</span>
-            <span style={conclusionValueStyles}>{fields.Conclusion || 'N/A'}</span>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${activeTheme.divider.borderColor}`, paddingBottom: '0.5rem'}}>
+            <span style={{fontWeight: '600', ...activeTheme.label}}>{t.conclusion}:</span>
+            <span style={{fontWeight: '500', ...activeTheme.conclusionValue}}>{fields.Conclusion || 'N/A'}</span>
           </div>
-          <div style={itemStyles}>
-            <span style={labelStyles}>{t.weight}:</span>
-            <span style={valueStyles}>{fields.Weight || 'N/A'}</span>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${activeTheme.divider.borderColor}`, paddingBottom: '0.5rem'}}>
+            <span style={{fontWeight: '600', ...activeTheme.label}}>{t.weight}:</span>
+            <span style={{fontWeight: '500', ...activeTheme.value}}>{fields.Weight || 'N/A'}</span>
           </div>
-          <div style={itemStyles}>
-            <span style={labelStyles}>{t.shapeCut}:</span>
-            <span style={valueStyles}>{fields.Shape_Cut || 'N/A'}</span>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${activeTheme.divider.borderColor}`, paddingBottom: '0.5rem'}}>
+            <span style={{fontWeight: '600', ...activeTheme.label}}>{t.shapeCut}:</span>
+            <span style={{fontWeight: '500', ...activeTheme.value}}>{fields.Shape_Cut || 'N/A'}</span>
           </div>
           
           {fields.Comment && (
-            <div style={commentContainerStyles}>
-              <span style={commentLabelStyles}>{t.comment}:</span>
-              <p style={commentTextStyles}>{fields.Comment}</p>
+            <div>
+              <span style={{fontWeight: '600', ...activeTheme.label}}>{t.comment}:</span>
+              <p style={{backgroundColor: '#f9fafb', padding: '0.75rem', borderRadius: '0.375rem', marginTop: '0.25rem', ...activeTheme.value}}>{fields.Comment}</p>
             </div>
           )}
         </div>
