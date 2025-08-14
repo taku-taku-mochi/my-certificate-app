@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // この関数が /api/certificate/[id] へのリクエストを処理します
+// 'export default' を削除し、'export async function GET' に変更
 export async function GET(request, { params }) {
   const recordId = params.id; // URLからIDを取得
   const { searchParams } = new URL(request.url);
@@ -38,8 +39,8 @@ export async function GET(request, { params }) {
       const fieldsToTranslate = {
         Conclusion: data.fields.Conclusion,
         Shape_Cut: data.fields.Shape_Cut,
-        Comment: data.fields.Comment,
-        Weight: data.fields.Weight, // ★ この行を追加してWeightも翻訳対象に
+        'Comment1': data.fields['Comment1'],
+        Weight: data.fields.Weight,
       };
 
       // 翻訳対象のフィールドが存在する場合のみAIを呼び出す

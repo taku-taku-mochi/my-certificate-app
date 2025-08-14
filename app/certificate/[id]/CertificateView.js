@@ -45,47 +45,49 @@ const translations = {
 
 // --- 各デザインテーマのスタイル定義 ---
 
-// A案: ミニマリスト ＆ ラグジュアリー
+// A案: ミニマリスト ＆ ラグジュアリー (改)
 const themeAStyles = {
   page: {
-    backgroundColor: '#1a1a1a', // Dark background
+    backgroundColor: '#121212', // Slightly deeper black
   },
   card: {
-    backgroundColor: '#2b2b2b',
-    border: '1px solid #444',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+    backgroundColor: '#1e1e1e',
+    border: '1px solid #333',
+    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6)',
+    padding: '3rem', // Increase padding for more space
   },
   title: {
-    color: '#d4af37', // Gold color
+    color: '#e0e0e0',
     fontWeight: '300',
-    letterSpacing: '0.1em',
+    letterSpacing: '0.15em',
+    fontFamily: "'Georgia', 'Times New Roman', serif",
   },
   id: {
-    color: '#aaa',
+    color: '#888',
   },
   label: {
-    color: '#aaa',
+    color: '#999',
   },
   value: {
-    color: '#f0f0f0',
+    color: '#f5f5f5',
   },
   conclusionValue: {
-    color: '#d4af37',
+    color: '#ffffff', // Changed from gold to white
     fontSize: '1.5rem',
   },
   divider: {
-    borderColor: '#444',
+    borderColor: '#333',
   }
 };
 
 // B案：クラシック ＆ オーセンティック
 const themeBStyles = {
   page: {
-    backgroundColor: '#fdfaee', // Parchment color
+    backgroundColor: '#fdfaee',
   },
   card: {
     backgroundColor: '#ffffff',
-    border: '8px double #c0a080', // Ornate double border
+    border: '8px double #c0a080',
     padding: '3rem',
   },
   title: {
@@ -150,7 +152,7 @@ export default function CertificateView({ recordId }) {
   const [certificateData, setCertificateData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeTheme, setActiveTheme] = useState(themeCStyles); // デフォルトテーマを設定
+  const [activeTheme, setActiveTheme] = useState(themeCStyles);
 
   useEffect(() => {
     const getCertificateData = async (id, lang) => {
@@ -159,21 +161,31 @@ export default function CertificateView({ recordId }) {
       setErrorMessage('');
       try {
         const response = await fetch(`/api/certificate/${id}?lang=${lang}`);
+        
         if (!response.ok) {
-          const errorResult = await response.json();
-          throw new Error(errorResult.message || 'Failed to fetch data');
+          let errorText = await response.text();
+          let message = translations[lang].errorFetch;
+          try {
+            const errorResult = JSON.parse(errorText);
+            message = errorResult.message || message;
+          } catch (e) {
+            if (errorText) {
+              message = errorText;
+            }
+          }
+          throw new Error(message);
         }
+
         const data = await response.json();
         setCertificateData(data);
 
-        // ★★★ Airtableのテーマ設定に応じてスタイルを切り替え ★★★
         const theme = data.fields['Design Theme'];
         if (theme === 'A') {
           setActiveTheme(themeAStyles);
         } else if (theme === 'B') {
           setActiveTheme(themeBStyles);
         } else {
-          setActiveTheme(themeCStyles); // デフォルトはC
+          setActiveTheme(themeCStyles);
         }
 
       } catch (error) {
@@ -199,26 +211,93 @@ export default function CertificateView({ recordId }) {
     fontFamily: "'Helvetica Neue', Arial, sans-serif",
     padding: '1rem',
     transition: 'background-color 0.5s ease',
-    ...activeTheme.page, // テーマのスタイルを適用
+    ...activeTheme.page,
   };
 
   const cardStyles = {
     width: '100%',
-    maxWidth: '448px',
+    maxWidth: '560px',
     borderRadius: '0.5rem',
     padding: '2.5rem',
     transition: 'all 0.5s ease',
-    ...activeTheme.card, // テーマのスタイルを適用
+    ...activeTheme.card,
   };
   
-  // ... (他のスタイル定義は省略)
+  const langButtonContainerStyles = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    marginBottom: '1.5rem',
+  };
+
+  const langButtonStyles = (isActive) => ({
+    padding: '0.25rem 0.75rem',
+    border: `1px solid ${isActive ? '#3b82f6' : '#d1d5db'}`,
+    borderRadius: '0.375rem',
+    cursor: 'pointer',
+    backgroundColor: isActive ? '#3b82f6' : 'transparent',
+    color: isActive ? '#ffffff' : activeTheme.label.color,
+    fontSize: '0.875rem',
+    transition: 'all 0.2s ease-in-out',
+  });
+  
+  const itemStyles = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    padding: '1rem 0',
+    borderBottom: `1px solid ${activeTheme.divider.borderColor}`,
+  };
+
+  const labelStyles = {
+    flexShrink: 0,
+    paddingRight: '1.5rem',
+    fontWeight: '600',
+    ...activeTheme.label,
+  };
+
+  const valueStyles = {
+    textAlign: 'right',
+    wordBreak: 'break-word',
+    fontWeight: '500',
+    ...activeTheme.value,
+  };
+
+  const conclusionValueStyles = {
+      ...valueStyles,
+      ...activeTheme.conclusionValue,
+  };
+  
+  const errorContainerStyles = {
+    textAlign: 'center',
+    padding: '2rem',
+    width: '100%',
+    maxWidth: '500px',
+  };
+
+  const errorStyles = {
+    backgroundColor: '#fff0f0',
+    color: '#d8000c',
+    padding: '3rem',
+    borderRadius: '16px',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+  };
 
   if (loading) {
       return <main style={pageStyles}><p style={{color: '#888'}}>{t.loading}</p></main>
   }
 
   if (errorMessage || !certificateData) {
-    // ... (エラー表示部分は省略)
+    return (
+      <main style={pageStyles}>
+          <div style={errorContainerStyles}>
+              <div style={errorStyles}>
+                  <h2>{t.errorTitle}</h2>
+                  <p>{errorMessage || t.errorNotFound}</p>
+              </div>
+          </div>
+      </main>
+    );
   }
 
   const fields = certificateData.fields;
@@ -227,7 +306,11 @@ export default function CertificateView({ recordId }) {
   return (
     <main style={pageStyles}>
       <div style={cardStyles}>
-        {/* ... (言語ボタン部分は省略) ... */}
+        <div style={langButtonContainerStyles}>
+          <button style={langButtonStyles(language === 'ja')} onClick={() => setLanguage('ja')}>日本語</button>
+          <button style={langButtonStyles(language === 'en')} onClick={() => setLanguage('en')}>English</button>
+          <button style={langButtonStyles(language === 'zh')} onClick={() => setLanguage('zh')}>中文</button>
+        </div>
         <div style={{textAlign: 'center', marginBottom: '1.5rem'}}>
           <h1 style={{fontSize: '1.5rem', fontWeight: 'bold', ...activeTheme.title}}>{t.title}</h1>
           <p style={{fontSize: '0.875rem', marginTop: '0.25rem', ...activeTheme.id}}>- {t.certNo}: {fields.CNo || 'N/A'} -</p>
@@ -237,24 +320,25 @@ export default function CertificateView({ recordId }) {
           <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={{width: '100%', height: 'auto', borderRadius: '0.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'}} />
         </div>
 
-        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${activeTheme.divider.borderColor}`, paddingBottom: '0.5rem'}}>
-            <span style={{fontWeight: '600', ...activeTheme.label}}>{t.conclusion}:</span>
-            <span style={{fontWeight: '500', ...activeTheme.conclusionValue}}>{fields.Conclusion || 'N/A'}</span>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+          <div style={itemStyles}>
+            <span style={labelStyles}>{t.conclusion}:</span>
+            <span style={conclusionValueStyles}>{fields.Conclusion || 'N/A'}</span>
           </div>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${activeTheme.divider.borderColor}`, paddingBottom: '0.5rem'}}>
-            <span style={{fontWeight: '600', ...activeTheme.label}}>{t.weight}:</span>
-            <span style={{fontWeight: '500', ...activeTheme.value}}>{fields.Weight || 'N/A'}</span>
+          <div style={itemStyles}>
+            <span style={labelStyles}>{t.weight}:</span>
+            <span style={valueStyles}>{fields.Weight || 'N/A'}</span>
           </div>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${activeTheme.divider.borderColor}`, paddingBottom: '0.5rem'}}>
-            <span style={{fontWeight: '600', ...activeTheme.label}}>{t.shapeCut}:</span>
-            <span style={{fontWeight: '500', ...activeTheme.value}}>{fields.Shape_Cut || 'N/A'}</span>
+          <div style={itemStyles}>
+            <span style={labelStyles}>{t.shapeCut}:</span>
+            <span style={valueStyles}>{fields.Shape_Cut || 'N/A'}</span>
           </div>
           
-          {fields.Comment && (
-            <div>
+          {fields['Comment1'] && (
+            <div style={{paddingTop: '1rem'}}>
               <span style={{fontWeight: '600', ...activeTheme.label}}>{t.comment}:</span>
-              <p style={{backgroundColor: '#f9fafb', padding: '0.75rem', borderRadius: '0.375rem', marginTop: '0.25rem', ...activeTheme.value}}>{fields.Comment}</p>
+              {/* ★★★ 修正点: コメントの背景をなくし、スタイルを調整 ★★★ */}
+              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value}}>{fields['Comment1']}</p>
             </div>
           )}
         </div>
