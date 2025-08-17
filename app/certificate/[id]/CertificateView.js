@@ -33,7 +33,7 @@ const translations = {
     title: '证书数据',
     certNo: '证书编号',
     conclusion: '结论',
-    weight: '重量 (ct)',
+    weight: '克重 (ct)',
     shapeCut: '形状与切工',
     comment: '评论',
     errorTitle: '错误',
@@ -45,22 +45,24 @@ const translations = {
 
 // --- 各デザインテーマのスタイル定義 ---
 
-// A案: ミニマリスト ＆ ラグジュアリー (改)
+// A案: ミニマリスト＆ラグジュアリー (改)
 const themeAStyles = {
   page: {
-    backgroundColor: '#121212', // Slightly deeper black
+    backgroundColor: '#121212',
   },
   card: {
     backgroundColor: '#1e1e1e',
-    border: '1px solid #333',
-    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6)',
-    padding: '3rem', // Increase padding for more space
+    border: '1px solid #444',
+    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.07)', // 白く光るグロー効果
+    padding: '3rem',
+    maxWidth: '640px',
   },
   title: {
     color: '#e0e0e0',
     fontWeight: '300',
     letterSpacing: '0.15em',
     fontFamily: "'Georgia', 'Times New Roman', serif",
+    fontSize: '1.5rem', // フォントサイズを元に戻す
   },
   id: {
     color: '#888',
@@ -72,15 +74,19 @@ const themeAStyles = {
     color: '#f5f5f5',
   },
   conclusionValue: {
-    color: '#ffffff', // Changed from gold to white
-    fontSize: '1.5rem',
+    color: '#ffffff',
+    fontSize: '1.5rem', // フォントサイズを元に戻す
+    fontWeight: '500',
   },
   divider: {
-    borderColor: '#333',
+    borderColor: '#444',
+  },
+  imageShadow: {
+    boxShadow: '5px 5px 20px rgba(255, 255, 255, 0.15)', // ★★★ 白い影をより強く、大きく強調 ★★★
   }
 };
 
-// B案：クラシック ＆ オーセンティック
+// B案：クラシック＆オーセンティック
 const themeBStyles = {
   page: {
     backgroundColor: '#fdfaee',
@@ -89,10 +95,13 @@ const themeBStyles = {
     backgroundColor: '#ffffff',
     border: '8px double #c0a080',
     padding: '3rem',
+    maxWidth: '560px',
   },
   title: {
     fontFamily: "'Georgia', 'Times New Roman', serif",
     color: '#5d4037',
+    fontSize: '2rem',
+    fontWeight: '600',
   },
   id: {
     color: '#795548',
@@ -112,10 +121,13 @@ const themeBStyles = {
   },
   divider: {
     borderColor: '#d7ccc8',
+  },
+  imageShadow: {
+    boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)',
   }
 };
 
-// C案：フォトグラフィック ＆ ダイナミック (デフォルト)
+// C案：フォトグラフィック＆ダイナミック (デフォルト)
 const themeCStyles = {
   page: {
     backgroundColor: '#f1f5f9',
@@ -123,9 +135,12 @@ const themeCStyles = {
   card: {
     backgroundColor: '#ffffff',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    maxWidth: '560px',
   },
   title: {
     color: '#1f2937',
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
   },
   id: {
     color: '#6b7280',
@@ -142,6 +157,9 @@ const themeCStyles = {
   },
   divider: {
     borderColor: '#e5e7eb',
+  },
+  imageShadow: {
+    boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)',
   }
 };
 
@@ -216,7 +234,6 @@ export default function CertificateView({ recordId }) {
 
   const cardStyles = {
     width: '100%',
-    maxWidth: '560px',
     borderRadius: '0.5rem',
     padding: '2.5rem',
     transition: 'all 0.5s ease',
@@ -302,6 +319,13 @@ export default function CertificateView({ recordId }) {
 
   const fields = certificateData.fields;
   const imageUrl = fields.Image && fields.Image.length > 0 ? fields.Image[0].url : 'https://placehold.co/600x400/e2e8f0/a0aec0?text=No+Image';
+  
+  const imageStyles = {
+    width: '100%',
+    height: 'auto',
+    borderRadius: '0.5rem',
+    ...activeTheme.imageShadow,
+  };
 
   return (
     <main style={pageStyles}>
@@ -312,12 +336,12 @@ export default function CertificateView({ recordId }) {
           <button style={langButtonStyles(language === 'zh')} onClick={() => setLanguage('zh')}>中文</button>
         </div>
         <div style={{textAlign: 'center', marginBottom: '1.5rem'}}>
-          <h1 style={{fontSize: '1.5rem', fontWeight: 'bold', ...activeTheme.title}}>{t.title}</h1>
+          <h1 style={{...activeTheme.title}}>{t.title}</h1>
           <p style={{fontSize: '0.875rem', marginTop: '0.25rem', ...activeTheme.id}}>- {t.certNo}: {fields.CNo || 'N/A'} -</p>
         </div>
 
         <div style={{marginBottom: '1.5rem'}}>
-          <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={{width: '100%', height: 'auto', borderRadius: '0.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'}} />
+          <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={imageStyles} />
         </div>
 
         <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
@@ -337,7 +361,6 @@ export default function CertificateView({ recordId }) {
           {fields['Comment1'] && (
             <div style={{paddingTop: '1rem'}}>
               <span style={{fontWeight: '600', ...activeTheme.label}}>{t.comment}:</span>
-              {/* ★★★ 修正点: コメントの背景をなくし、スタイルを調整 ★★★ */}
               <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value}}>{fields['Comment1']}</p>
             </div>
           )}
