@@ -238,16 +238,15 @@ export default function CertificateView({ recordId }) {
 
   const t = translations[language];
 
-  // ★★★ テキストの長さに応じて動的にフォントサイズを調整する関数 (改善版) ★★★
+  // ★★★ テキストの長さに応じて動的にフォントサイズを調整する関数 (鑑別結果以外に適用) ★★★
   const getDynamicValueStyles = (text = '') => {
     if (width && width <= 640) { // スマートフォンサイズの時だけ適用
       const len = text ? text.length : 0;
-      // 日本語の文字幅を考慮し、しきい値と縮小率を調整
       if (len > 20) {
-        return { fontSize: '0.75em' }; // 最も小さいサイズ
+        return { fontSize: '0.75em' };
       }
       if (len > 12) {
-        return { fontSize: '0.85em' }; // 少し小さいサイズ
+        return { fontSize: '0.85em' };
       }
     }
     return {}; // PCサイズや短いテキストの場合は何もしない
@@ -403,7 +402,8 @@ export default function CertificateView({ recordId }) {
         <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.conclusion}:</span>
-            <span style={{...conclusionValueStyles, ...getDynamicValueStyles(fields.Conclusion)}} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
+            {/* ★★★ 鑑別結果は動的フォントサイズ調整を適用しない ★★★ */}
+            <span style={conclusionValueStyles} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
           </div>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.weight}:</span>
