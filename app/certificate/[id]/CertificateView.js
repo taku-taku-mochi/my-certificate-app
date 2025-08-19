@@ -316,6 +316,7 @@ export default function CertificateView({ recordId }) {
       }
       .detail-item-value {
         text-align: left;
+        font-size: 0.9em; /* ★★★ フォントサイズを少し小さくして折り返しを抑制 ★★★ */
       }
       .header-title {
         font-size: 1.25rem;
