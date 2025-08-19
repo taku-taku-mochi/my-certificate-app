@@ -44,7 +44,6 @@ const translations = {
 };
 
 // --- 各デザインテーマのスタイル定義 ---
-
 // A案: ミニマリスト＆ラグジュアリー (改)
 const themeAStyles = {
   page: {
@@ -163,6 +162,24 @@ const themeCStyles = {
   }
 };
 
+// --- 画面サイズを取得するカスタムフック ---
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+  });
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+      });
+    }
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return windowSize;
+};
+
 
 // --- 表示担当のコンポーネント ---
 export default function CertificateView({ recordId }) {
@@ -171,6 +188,7 @@ export default function CertificateView({ recordId }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTheme, setActiveTheme] = useState(themeCStyles);
+  const { width } = useWindowSize(); // 画面幅を取得
 
   useEffect(() => {
     const getCertificateData = async (id, lang) => {
@@ -219,6 +237,20 @@ export default function CertificateView({ recordId }) {
   }, [recordId, language]);
 
   const t = translations[language];
+
+  // ★★★ テキストの長さに応じて動的にフォントサイズを調整する関数 ★★★
+  const getDynamicValueStyles = (text = '') => {
+    if (width && width <= 640) { // スマートフォンサイズの時だけ適用
+      const len = text.length;
+      if (len > 25) {
+        return { fontSize: '0.8em' };
+      }
+      if (len > 15) {
+        return { fontSize: '0.9em' };
+      }
+    }
+    return {}; // PCサイズや短いテキストの場合は何もしない
+  };
 
   // --- 汎用スタイル定義 ---
   const pageStyles = {
@@ -300,7 +332,6 @@ export default function CertificateView({ recordId }) {
     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
   };
 
-  // ★★★ スマートフォン用のレスポンシブスタイル ★★★
   const responsiveStyles = `
     @media (max-width: 640px) {
       .certificate-card {
@@ -316,7 +347,6 @@ export default function CertificateView({ recordId }) {
       }
       .detail-item-value {
         text-align: left;
-        font-size: 0.9em; /* ★★★ フォントサイズを少し小さくして折り返しを抑制 ★★★ */
       }
       .header-title {
         font-size: 1.25rem;
@@ -372,21 +402,21 @@ export default function CertificateView({ recordId }) {
         <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.conclusion}:</span>
-            <span style={conclusionValueStyles} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
+            <span style={{...conclusionValueStyles, ...getDynamicValueStyles(fields.Conclusion)}} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
           </div>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.weight}:</span>
-            <span style={valueStyles} className="detail-item-value">{fields.Weight || 'N/A'}</span>
+            <span style={{...valueStyles, ...getDynamicValueStyles(fields.Weight)}} className="detail-item-value">{fields.Weight || 'N/A'}</span>
           </div>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.shapeCut}:</span>
-            <span style={valueStyles} className="detail-item-value">{fields.Shape_Cut || 'N/A'}</span>
+            <span style={{...valueStyles, ...getDynamicValueStyles(fields.Shape_Cut)}} className="detail-item-value">{fields.Shape_Cut || 'N/A'}</span>
           </div>
           
           {fields['Comment1'] && (
             <div style={{paddingTop: '1rem'}} className="detail-item">
               <span style={{fontWeight: '600', ...activeTheme.label}} className="detail-item-label">{t.comment}:</span>
-              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value}} className="detail-item-value">{fields['Comment1']}</p>
+              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value, ...getDynamicValueStyles(fields['Comment1'])}} className="detail-item-value">{fields['Comment1']}</p>
             </div>
           )}
         </div>
