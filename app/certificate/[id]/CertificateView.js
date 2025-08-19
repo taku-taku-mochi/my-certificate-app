@@ -44,6 +44,9 @@ const translations = {
 };
 
 // --- 各デザインテーマのスタイル定義 ---
+const SERIF_FONT = "'Georgia', 'Times New Roman', serif";
+const SANS_SERIF_FONT = "'Helvetica Neue', Arial, sans-serif";
+
 // A案: ミニマリスト＆ラグジュアリー (改)
 const themeAStyles = {
   page: {
@@ -55,12 +58,12 @@ const themeAStyles = {
     boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.07)',
     padding: '3rem',
     maxWidth: '640px',
+    fontFamily: SERIF_FONT, // ★★★ フォントを統一 ★★★
   },
   title: {
     color: '#e0e0e0',
     fontWeight: '300',
     letterSpacing: '0.15em',
-    fontFamily: "'Georgia', 'Times New Roman', serif",
     fontSize: '1.5rem',
   },
   id: {
@@ -95,9 +98,9 @@ const themeBStyles = {
     border: '8px double #c0a080',
     padding: '3rem',
     maxWidth: '560px',
+    fontFamily: SERIF_FONT, // フォントを統一
   },
   title: {
-    fontFamily: "'Georgia', 'Times New Roman', serif",
     color: '#5d4037',
     fontSize: '2rem',
     fontWeight: '600',
@@ -106,15 +109,12 @@ const themeBStyles = {
     color: '#795548',
   },
   label: {
-    fontFamily: "'Georgia', 'Times New Roman', serif",
     color: '#795548',
   },
   value: {
-    fontFamily: "'Georgia', 'Times New Roman', serif",
     color: '#3e2723',
   },
   conclusionValue: {
-    fontFamily: "'Georgia', 'Times New Roman', serif",
     color: '#5d4037',
     fontSize: '1.5rem',
   },
@@ -135,6 +135,7 @@ const themeCStyles = {
     backgroundColor: '#ffffff',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     maxWidth: '560px',
+    fontFamily: SANS_SERIF_FONT, // フォントを統一
   },
   title: {
     color: '#1f2937',
@@ -162,24 +163,6 @@ const themeCStyles = {
   }
 };
 
-// --- 画面サイズを取得するカスタムフック ---
-const useWindowSize = () => {
-  const [windowSize, setWindowSize] = useState({
-    width: undefined,
-  });
-  useEffect(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-      });
-    }
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return windowSize;
-};
-
 
 // --- 表示担当のコンポーネント ---
 export default function CertificateView({ recordId }) {
@@ -188,7 +171,6 @@ export default function CertificateView({ recordId }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTheme, setActiveTheme] = useState(themeCStyles);
-  const { width } = useWindowSize(); // 画面幅を取得
 
   useEffect(() => {
     const getCertificateData = async (id, lang) => {
@@ -238,27 +220,12 @@ export default function CertificateView({ recordId }) {
 
   const t = translations[language];
 
-  // ★★★ テキストの長さに応じて動的にフォントサイズを調整する関数 (鑑別結果以外に適用) ★★★
-  const getDynamicValueStyles = (text = '') => {
-    if (width && width <= 640) { // スマートフォンサイズの時だけ適用
-      const len = text ? text.length : 0;
-      if (len > 20) {
-        return { fontSize: '0.75em' };
-      }
-      if (len > 12) {
-        return { fontSize: '0.85em' };
-      }
-    }
-    return {}; // PCサイズや短いテキストの場合は何もしない
-  };
-
   // --- 汎用スタイル定義 ---
   const pageStyles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
-    fontFamily: "'Helvetica Neue', Arial, sans-serif",
     padding: '1rem',
     transition: 'background-color 0.5s ease',
     ...activeTheme.page,
@@ -307,7 +274,6 @@ export default function CertificateView({ recordId }) {
 
   const valueStyles = {
     textAlign: 'right',
-    wordBreak: 'break-word',
     fontWeight: '500',
     ...activeTheme.value,
   };
@@ -332,10 +298,12 @@ export default function CertificateView({ recordId }) {
     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
   };
 
+  // ★★★ スマートフォン用のレスポンシブスタイル (改善版) ★★★
   const responsiveStyles = `
     @media (max-width: 640px) {
       .certificate-card {
         padding: 1.5rem;
+        font-size: 0.9rem;
       }
       .detail-item {
         flex-direction: column;
@@ -347,6 +315,7 @@ export default function CertificateView({ recordId }) {
       }
       .detail-item-value {
         text-align: left;
+        word-break: break-all; /* 長い単語でも強制的に改行 */
       }
       .header-title {
         font-size: 1.25rem;
@@ -402,22 +371,21 @@ export default function CertificateView({ recordId }) {
         <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.conclusion}:</span>
-            {/* ★★★ 鑑別結果は動的フォントサイズ調整を適用しない ★★★ */}
             <span style={conclusionValueStyles} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
           </div>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.weight}:</span>
-            <span style={{...valueStyles, ...getDynamicValueStyles(fields.Weight)}} className="detail-item-value">{fields.Weight || 'N/A'}</span>
+            <span style={valueStyles} className="detail-item-value">{fields.Weight || 'N/A'}</span>
           </div>
           <div style={itemStyles} className="detail-item">
             <span style={labelStyles} className="detail-item-label">{t.shapeCut}:</span>
-            <span style={{...valueStyles, ...getDynamicValueStyles(fields.Shape_Cut)}} className="detail-item-value">{fields.Shape_Cut || 'N/A'}</span>
+            <span style={valueStyles} className="detail-item-value">{fields.Shape_Cut || 'N/A'}</span>
           </div>
           
           {fields['Comment1'] && (
             <div style={{paddingTop: '1rem'}} className="detail-item">
               <span style={{fontWeight: '600', ...activeTheme.label}} className="detail-item-label">{t.comment}:</span>
-              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value, ...getDynamicValueStyles(fields['Comment1'])}} className="detail-item-value">{fields['Comment1']}</p>
+              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value}} className="detail-item-value">{fields['Comment1']}</p>
             </div>
           )}
         </div>
