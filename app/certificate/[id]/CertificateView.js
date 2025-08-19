@@ -238,15 +238,16 @@ export default function CertificateView({ recordId }) {
 
   const t = translations[language];
 
-  // ★★★ テキストの長さに応じて動的にフォントサイズを調整する関数 ★★★
+  // ★★★ テキストの長さに応じて動的にフォントサイズを調整する関数 (改善版) ★★★
   const getDynamicValueStyles = (text = '') => {
     if (width && width <= 640) { // スマートフォンサイズの時だけ適用
-      const len = text.length;
-      if (len > 25) {
-        return { fontSize: '0.8em' };
+      const len = text ? text.length : 0;
+      // 日本語の文字幅を考慮し、しきい値と縮小率を調整
+      if (len > 20) {
+        return { fontSize: '0.75em' }; // 最も小さいサイズ
       }
-      if (len > 15) {
-        return { fontSize: '0.9em' };
+      if (len > 12) {
+        return { fontSize: '0.85em' }; // 少し小さいサイズ
       }
     }
     return {}; // PCサイズや短いテキストの場合は何もしない
