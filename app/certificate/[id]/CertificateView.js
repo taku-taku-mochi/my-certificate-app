@@ -53,7 +53,7 @@ const themeAStyles = {
   card: {
     backgroundColor: '#1e1e1e',
     border: '1px solid #444',
-    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.07)', // 白く光るグロー効果
+    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.07)',
     padding: '3rem',
     maxWidth: '640px',
   },
@@ -62,7 +62,7 @@ const themeAStyles = {
     fontWeight: '300',
     letterSpacing: '0.15em',
     fontFamily: "'Georgia', 'Times New Roman', serif",
-    fontSize: '1.5rem', // フォントサイズを元に戻す
+    fontSize: '1.5rem',
   },
   id: {
     color: '#888',
@@ -75,14 +75,14 @@ const themeAStyles = {
   },
   conclusionValue: {
     color: '#ffffff',
-    fontSize: '1.5rem', // フォントサイズを元に戻す
+    fontSize: '1.5rem',
     fontWeight: '500',
   },
   divider: {
     borderColor: '#444',
   },
   imageShadow: {
-    boxShadow: '5px 5px 20px rgba(255, 255, 255, 0.15)', // ★★★ 白い影をより強く、大きく強調 ★★★
+    boxShadow: '5px 5px 20px rgba(255, 255, 255, 0.15)',
   }
 };
 
@@ -300,6 +300,29 @@ export default function CertificateView({ recordId }) {
     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
   };
 
+  // ★★★ スマートフォン用のレスポンシブスタイル ★★★
+  const responsiveStyles = `
+    @media (max-width: 640px) {
+      .certificate-card {
+        padding: 1.5rem;
+      }
+      .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+      .detail-item-label {
+        padding-right: 0;
+      }
+      .detail-item-value {
+        text-align: left;
+      }
+      .header-title {
+        font-size: 1.25rem;
+      }
+    }
+  `;
+
   if (loading) {
       return <main style={pageStyles}><p style={{color: '#888'}}>{t.loading}</p></main>
   }
@@ -329,14 +352,15 @@ export default function CertificateView({ recordId }) {
 
   return (
     <main style={pageStyles}>
-      <div style={cardStyles}>
+      <style>{responsiveStyles}</style>
+      <div style={cardStyles} className="certificate-card">
         <div style={langButtonContainerStyles}>
           <button style={langButtonStyles(language === 'ja')} onClick={() => setLanguage('ja')}>日本語</button>
           <button style={langButtonStyles(language === 'en')} onClick={() => setLanguage('en')}>English</button>
           <button style={langButtonStyles(language === 'zh')} onClick={() => setLanguage('zh')}>中文</button>
         </div>
         <div style={{textAlign: 'center', marginBottom: '1.5rem'}}>
-          <h1 style={{...activeTheme.title}}>{t.title}</h1>
+          <h1 style={{...activeTheme.title}} className="header-title">{t.title}</h1>
           <p style={{fontSize: '0.875rem', marginTop: '0.25rem', ...activeTheme.id}}>- {t.certNo}: {fields.CNo || 'N/A'} -</p>
         </div>
 
@@ -345,23 +369,23 @@ export default function CertificateView({ recordId }) {
         </div>
 
         <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-          <div style={itemStyles}>
-            <span style={labelStyles}>{t.conclusion}:</span>
-            <span style={conclusionValueStyles}>{fields.Conclusion || 'N/A'}</span>
+          <div style={itemStyles} className="detail-item">
+            <span style={labelStyles} className="detail-item-label">{t.conclusion}:</span>
+            <span style={conclusionValueStyles} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
           </div>
-          <div style={itemStyles}>
-            <span style={labelStyles}>{t.weight}:</span>
-            <span style={valueStyles}>{fields.Weight || 'N/A'}</span>
+          <div style={itemStyles} className="detail-item">
+            <span style={labelStyles} className="detail-item-label">{t.weight}:</span>
+            <span style={valueStyles} className="detail-item-value">{fields.Weight || 'N/A'}</span>
           </div>
-          <div style={itemStyles}>
-            <span style={labelStyles}>{t.shapeCut}:</span>
-            <span style={valueStyles}>{fields.Shape_Cut || 'N/A'}</span>
+          <div style={itemStyles} className="detail-item">
+            <span style={labelStyles} className="detail-item-label">{t.shapeCut}:</span>
+            <span style={valueStyles} className="detail-item-value">{fields.Shape_Cut || 'N/A'}</span>
           </div>
           
           {fields['Comment1'] && (
-            <div style={{paddingTop: '1rem'}}>
-              <span style={{fontWeight: '600', ...activeTheme.label}}>{t.comment}:</span>
-              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value}}>{fields['Comment1']}</p>
+            <div style={{paddingTop: '1rem'}} className="detail-item">
+              <span style={{fontWeight: '600', ...activeTheme.label}} className="detail-item-label">{t.comment}:</span>
+              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...activeTheme.value}} className="detail-item-value">{fields['Comment1']}</p>
             </div>
           )}
         </div>
