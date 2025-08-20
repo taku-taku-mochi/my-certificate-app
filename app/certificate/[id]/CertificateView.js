@@ -7,10 +7,10 @@ import { useState, useEffect } from 'react';
 const translations = {
   ja: {
     title: '鑑別データ',
-    certNo: '証書No',
+    certNo: 'No',
     conclusion: '鑑別結果',
     weight: '重量',
-    shapeCut: '形状 & カット',
+    shapeCut: '形状',
     comment: 'コメント',
     errorTitle: 'エラー',
     errorNotFound: '鑑定書が見つかりません。IDまたはQRコードが正しいかご確認ください。',
@@ -47,120 +47,43 @@ const translations = {
 const SERIF_FONT = "'Georgia', 'Times New Roman', serif";
 const SANS_SERIF_FONT = "'Helvetica Neue', Arial, sans-serif";
 
-// A案: ミニマリスト＆ラグジュアリー (改)
+// A案: ミニマリスト＆ラグジュアリー
 const themeAStyles = {
-  page: {
-    backgroundColor: '#121212',
-  },
-  card: {
-    backgroundColor: '#1e1e1e',
-    border: '1px solid #444',
-    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.07)',
-    padding: '3rem',
-    maxWidth: '640px',
-    fontFamily: SERIF_FONT, // ★★★ フォントを統一 ★★★
-  },
-  title: {
-    color: '#e0e0e0',
-    fontWeight: '300',
-    letterSpacing: '0.15em',
-    fontSize: '1.5rem',
-  },
-  id: {
-    color: '#888',
-  },
-  label: {
-    color: '#999',
-  },
-  value: {
-    color: '#f5f5f5',
-  },
-  conclusionValue: {
-    color: '#ffffff',
-    fontSize: '1.5rem',
-    fontWeight: '500',
-  },
-  divider: {
-    borderColor: '#444',
-  },
-  imageShadow: {
-    boxShadow: '5px 5px 20px rgba(255, 255, 255, 0.15)',
-  }
+  page: { backgroundColor: '#121212' },
+  card: { backgroundColor: '#1e1e1e', border: '1px solid #444', boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.07)', padding: '3rem', maxWidth: '640px', fontFamily: SERIF_FONT },
+  title: { color: '#e0e0e0', fontWeight: '300', letterSpacing: '0.15em', fontSize: '1.5rem' },
+  id: { color: '#888' },
+  label: { color: '#999' },
+  value: { color: '#f5f5f5' },
+  conclusionValue: { color: '#ffffff', fontSize: '1.5rem', fontWeight: '500' },
+  divider: { borderColor: '#444' },
+  imageShadow: { boxShadow: '5px 5px 20px rgba(255, 255, 255, 0.15)' }
 };
 
 // B案：クラシック＆オーセンティック
 const themeBStyles = {
-  page: {
-    backgroundColor: '#fdfaee',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    border: '8px double #c0a080',
-    padding: '3rem',
-    maxWidth: '560px',
-    fontFamily: SERIF_FONT, // フォントを統一
-  },
-  title: {
-    color: '#5d4037',
-    fontSize: '2rem',
-    fontWeight: '600',
-  },
-  id: {
-    color: '#795548',
-  },
-  label: {
-    color: '#795548',
-  },
-  value: {
-    color: '#3e2723',
-  },
-  conclusionValue: {
-    color: '#5d4037',
-    fontSize: '1.5rem',
-  },
-  divider: {
-    borderColor: '#d7ccc8',
-  },
-  imageShadow: {
-    boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)',
-  }
+  page: { backgroundColor: '#fdfaee' },
+  card: { backgroundColor: '#ffffff', border: '8px double #c0a080', padding: '3rem', maxWidth: '560px', fontFamily: SERIF_FONT },
+  title: { color: '#5d4037', fontSize: '2rem', fontWeight: '600' },
+  id: { color: '#795548' },
+  label: { color: '#795548' },
+  value: { color: '#3e2723' },
+  conclusionValue: { color: '#5d4037', fontSize: '1.5rem' },
+  divider: { borderColor: '#d7ccc8' },
+  imageShadow: { boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)' }
 };
 
-// C案：フォトグラフィック＆ダイナミック (デフォルト)
+// C案：デフォルト
 const themeCStyles = {
-  page: {
-    backgroundColor: '#f1f5f9',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    maxWidth: '560px',
-    fontFamily: SANS_SERIF_FONT, // フォントを統一
-  },
-  title: {
-    color: '#1f2937',
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-  },
-  id: {
-    color: '#6b7280',
-  },
-  label: {
-    color: '#4b5563',
-  },
-  value: {
-    color: '#1f2937',
-  },
-  conclusionValue: {
-    color: '#1f2937',
-    fontSize: '1.2rem',
-  },
-  divider: {
-    borderColor: '#e5e7eb',
-  },
-  imageShadow: {
-    boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)',
-  }
+  page: { backgroundColor: '#f1f5f9' },
+  card: { backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', maxWidth: '560px', fontFamily: SANS_SERIF_FONT },
+  title: { color: '#1f2937', fontSize: '1.5rem', fontWeight: 'bold' },
+  id: { color: '#6b7280' },
+  label: { color: '#4b5563' },
+  value: { color: '#1f2937' },
+  conclusionValue: { color: '#1f2937', fontSize: '1.2rem' },
+  divider: { borderColor: '#e5e7eb' },
+  imageShadow: { boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)' }
 };
 
 
@@ -238,7 +161,8 @@ export default function CertificateView({ recordId }) {
     transition: 'all 0.5s ease',
     ...activeTheme.card,
   };
-  
+
+  //ページの上部にある言語切り替えボタン（「日本語」「English」「中文」）を囲んでいる「箱」のデザイン
   const langButtonContainerStyles = {
     display: 'flex',
     justifyContent: 'center',

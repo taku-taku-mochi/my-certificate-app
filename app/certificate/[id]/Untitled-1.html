@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鑑別・鑑定受付フォーム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* blue-500 with opacity */
+            border-color: #3b82f6;
+        }
+        .btn-primary {
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-secondary {
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #fca5a5;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+        }
+        .accordion-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            /* MODIFIED: Border is transparent by default */
+            border-bottom: 1px solid transparent;
+            transition: background-color 0.2s ease, border-color 0.3s ease;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            padding: 0 1.5rem;
+        }
+        .accordion-content.open {
+            max-height: 1500px; /* Increased max-height for content */
+            transition: max-height 0.5s ease-in, padding 0.3s ease-in;
+            padding: 1.5rem;
+        }
+        /* NEW RULE: Apply border color ONLY when the accordion is open */
+        .item-block.is-open .accordion-header {
+            border-bottom-color: #e5e7eb; /* Tailwind's gray-200 */
+        }
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 9999px; /* rounded-full */
+            transition: all 0.2s;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+        }
+        .toggle-label:has(input:checked) {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .drop-zone.drag-active {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-2xl">
+        <div class="flex items-center justify-center mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+            </svg>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">鑑別・鑑定受付フォーム</h1>
+        </div>
+        <p class="text-center text-gray-600 mb-8">ご希望のサービスと商品情報をご入力ください。</p>
+        
+        <!-- Step Indicator -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex-1 text-center">
+                <div class="step-indicator w-full h-2 bg-blue-500 rounded-full mx-auto"></div>
+                <p class="step-text text-sm mt-2 text-blue-600 font-medium">お客様情報</p>
+            </div>
+            <div class="flex-1 text-center">
+                <div class="step-indicator w-full h-2 bg-gray-300 rounded-full mx-auto"></div>
+                <p class="step-text text-sm mt-2 text-gray-500">商品情報</p>
+            </div>
+            <div class="flex-1 text-center">
+                <div class="step-indicator w-full h-2 bg-gray-300 rounded-full mx-auto"></div>
+                <p class="step-text text-sm mt-2 text-gray-500">確認</p>
+            </div>
+        </div>
+
+        <form id="receptionForm" class="space-y-8">
+
+            <!-- Step 1: Customer Information -->
+            <div id="step1" class="step-content active">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">お客様情報</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="customerName" class="block text-sm font-medium text-gray-600">会社名（お名前）<span class="text-red-500">*</span></label>
+                            <input type="text" id="customerName" name="customerName" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md form-input">
+                        </div>
+                        <div>
+                            <label for="contactInfo" class="block text-sm font-medium text-gray-600">電話番号<span class="text-red-500">*</span></label>
+                            <input type="tel" id="contactInfo" name="contactInfo" required autocomplete="tel" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md form-input">
+                        </div>
+                        <div>
+                            <label for="desiredDeliveryDate" class="block text-sm font-medium text-gray-600">希望納期<span class="text-red-500">*</span></label>
+                            <input type="date" id="desiredDeliveryDate" name="desiredDeliveryDate" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md form-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="button" id="nextStep1Btn" class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-600 btn-primary flex items-center justify-center">
+                        次へ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Product Information -->
+            <div id="step2" class="step-content">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">商品情報</h2>
+                    <div id="itemsContainer" class="space-y-4">
+                        <!-- Item blocks will be added here -->
+                    </div>
+                    <div class="flex justify-center mt-4">
+                        <button type="button" id="addItemBtnTop" class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-600 btn-primary flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            商品を追加する
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button type="button" id="prevStep2Btn" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-400">
+                        戻る
+                    </button>
+                    <button type="button" id="nextStep2Btn" class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-600 btn-primary flex items-center justify-center">
+                        次へ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div id="step3" class="step-content">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">内容確認</h2>
+                    <div id="confirmationSummary" class="space-y-4 text-gray-700">
+                        <!-- Confirmation content will be dynamically displayed here -->
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-between items-center bg-gray-200 p-4 rounded-lg">
+                    <span class="text-xl font-bold text-gray-700">概算見積金額:</span>
+                    <span id="totalPrice" class="text-2xl font-extrabold text-green-600">¥0</span>
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button type="button" id="prevStep3Btn" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-400">
+                        戻る
+                    </button>
+                    <button type="submit" id="submitBtn" class="w-full md:w-auto bg-green-500 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:bg-green-600 btn-primary">
+                        受付を完了する
+                    </button>
+                </div>
+            </div>
+            
+        </form>
+        <div id="messageBox" class="p-4 text-center rounded-lg text-sm hidden mt-6"></div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // IMPORTANT: Replace with your actual Airtable credentials.
+        const AIRTABLE_API_KEY = 'YOUR_API_KEY';
+        const AIRTABLE_BASE_ID = 'YOUR_BASE_ID';
+
+        const AIRTABLE_TABLES = {
+            ORDERS: '受付情報',
+            ITEMS: '商品情報',
+            CERTIFICATES: '証書情報'
+        };
+
+        // --- DATA & PRICES ---
+        const CERTIFICATE_PRICES = {
+            鑑定書: { 'S': 15000, 'M': 20000, 'L': 25000, 'メモ（ソーティング）': 30000, 'D': 35000 },
+            鑑別書: { 'S': 10000, 'M': 15000, 'L': 20000, 'メモ（ソーティング）': 25000, 'D': 30000 }
+        };
+        const OPTION_PRICES = {
+            'オプションA': 1000, 'オプションB': 2000, 'オプションC': 1500, 'オプションD': 2500,
+            'オプションE': 3000, 'オプションF': 500, 'オプションG': 1800
+        };
+        const ITEM_TYPES = ['リング', 'ペンダント', 'ピアス', 'イヤリング', 'ネックレス', 'ブレスレット', 'カフス', 'ブローチ', 'ルース'];
+        const CERTIFICATE_TYPES = ['鑑定書', '鑑別書'];
+        const CERTIFICATE_SIZES = ['S', 'M', 'L', 'メモ（ソーティング）', 'D'];
+
+        // --- DOM ELEMENTS ---
+        const form = document.getElementById('receptionForm');
+        const itemsContainer = document.getElementById('itemsContainer');
+        const addItemBtnTop = document.getElementById('addItemBtnTop');
+        const totalPriceEl = document.getElementById('totalPrice');
+        const messageBox = document.getElementById('messageBox');
+        
+        const nextStep1Btn = document.getElementById('nextStep1Btn');
+        const prevStep2Btn = document.getElementById('prevStep2Btn');
+        const nextStep2Btn = document.getElementById('nextStep2Btn');
+        const prevStep3Btn = document.getElementById('prevStep3Btn');
+        const submitBtn = document.getElementById('submitBtn');
+        const confirmationSummary = document.getElementById('confirmationSummary');
+        
+        const stepIndicators = document.querySelectorAll('.step-indicator');
+        const stepTexts = document.querySelectorAll('.step-text');
+
+        // --- STATE ---
+        let currentStep = 1;
+        let itemCounter = 0; // To ensure unique names for radio buttons
+
+        // --- UTILITY FUNCTIONS ---
+        function showMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = 'p-4 text-center rounded-lg text-sm mt-6'; // Reset classes
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'text-green-700', 'shadow-md');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-700', 'shadow-md');
+            } else if (type === 'info') {
+                messageBox.classList.add('bg-blue-100', 'text-blue-700', 'shadow-md');
+            }
+            messageBox.classList.remove('hidden');
+        }
+
+        // --- DYNAMIC ELEMENT CREATION ---
+        function createSelectBlock(options, name) {
+            const container = document.createElement('div');
+            container.className = 'flex items-center space-x-2 mt-1';
+            const selectEl = document.createElement('select');
+            selectEl.name = name;
+            selectEl.className = 'block w-full px-4 py-2 border border-gray-300 rounded-md form-input';
+            options.forEach(optionText => {
+                const option = document.createElement('option');
+                option.value = optionText;
+                option.textContent = optionText;
+                selectEl.appendChild(option);
+            });
+            container.appendChild(selectEl);
+            return container;
+        }
+
+        function createCertTypeToggle(uniqueId) {
+            const container = document.createElement('div');
+            container.className = 'flex items-center space-x-2 mt-1';
+            const radioGroup = document.createElement('div');
+            radioGroup.className = 'flex items-center space-x-2 flex-1';
+            
+            CERTIFICATE_TYPES.forEach((type, index) => {
+                const label = document.createElement('label');
+                label.className = 'toggle-label flex-1';
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = `certificateType-${uniqueId}`;
+                input.value = type;
+                input.className = 'hidden';
+                if (index === 0) input.checked = true;
+                
+                const span = document.createElement('span');
+                span.textContent = type;
+                label.appendChild(input);
+                label.appendChild(span);
+                radioGroup.appendChild(label);
+            });
+            
+            container.appendChild(radioGroup);
+            return container;
+        }
+
+        function addItemBlock(isOpen = false) {
+            itemCounter++;
+            const itemBlock = document.createElement('div');
+            itemBlock.className = 'item-block bg-white rounded-lg shadow-md mb-4 relative overflow-hidden';
+            itemBlock.dataset.itemId = itemCounter;
+            
+            itemBlock.innerHTML = `
+                <div class="accordion-header p-4 bg-gray-100 hover:bg-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700">
+                        <span class="item-number">商品 #${itemCounter}</span>
+                        <span class="item-summary text-gray-500 text-sm ml-4"></span>
+                    </h3>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" class="remove-item-block-btn text-red-400 hover:text-red-600 transition-colors duration-200 p-1 rounded-full btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </button>
+                        <svg class="h-6 w-6 text-gray-500 transform transition-transform duration-200 accordion-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                </div>
+                <div class="accordion-content p-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">鑑定・鑑別</label>
+                            <div class="certificate-types-container"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">証書サイズ</label>
+                            <div class="certificate-sizes-container"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">アイテム種別</label>
+                            <div class="item-types-container"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">ご要望・備考</label>
+                            <textarea name="itemNotes" rows="2" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md form-input"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-600">オプション</label>
+                        <div class="mt-2 grid grid-cols-2 gap-3">
+                            ${Object.keys(OPTION_PRICES).map(option => `
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="itemOptions" value="${option}" class="rounded-md text-blue-600 focus:ring-blue-500 w-5 h-5">
+                                    <span class="ml-2 text-sm text-gray-700">${option}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="mt-6 border-t pt-4">
+                        <label class="block text-sm font-medium text-gray-600">写真アップロード</label>
+                        <div class="drop-zone relative border-2 border-dashed border-gray-300 rounded-md p-6 text-center text-gray-500 hover:border-blue-500 transition-colors duration-200">
+                            <p>ファイルをドラッグ＆ドロップ or クリックして選択</p>
+                            <input type="file" name="itemImage" multiple accept="image/*" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"/>
+                        </div>
+                        <div class="mt-2 preview-container flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Populate dynamic parts
+            itemBlock.querySelector('.certificate-types-container').appendChild(createCertTypeToggle(itemCounter));
+            itemBlock.querySelector('.item-types-container').appendChild(createSelectBlock(ITEM_TYPES, 'itemType'));
+            itemBlock.querySelector('.certificate-sizes-container').appendChild(createSelectBlock(CERTIFICATE_SIZES, 'certificateSize'));
+
+            itemsContainer.appendChild(itemBlock);
+            updateItemNumbers();
+            
+            if (isOpen) {
+                const content = itemBlock.querySelector('.accordion-content');
+                const icon = itemBlock.querySelector('.accordion-icon');
+                content.classList.add('open');
+                icon.classList.add('rotate-180');
+                itemBlock.classList.add('is-open');
+                updateSummary(itemBlock);
+            }
+        }
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateItemNumbers() {
+            const itemBlocks = itemsContainer.querySelectorAll('.item-block');
+            itemBlocks.forEach((itemBlock, index) => {
+                const itemNumberEl = itemBlock.querySelector('.item-number');
+                if (itemNumberEl) {
+                    itemNumberEl.textContent = `商品 #${index + 1}`;
+                }
+                const removeBtn = itemBlock.querySelector('.remove-item-block-btn');
+                if (removeBtn) {
+                     removeBtn.innerHTML = index === 0 ? 
+                     `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>` : 
+                     `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>`;
+                }
+            });
+        }
+        
+        function updateTotalPrice() {
+            let total = 0;
+            itemsContainer.querySelectorAll('.item-block').forEach(itemBlock => {
+                const uniqueId = itemBlock.dataset.itemId;
+                const certTypeRadio = itemBlock.querySelector(`input[name="certificateType-${uniqueId}"]:checked`);
+                const certType = certTypeRadio ? certTypeRadio.value : null;
+                
+                if (certType) {
+                    itemBlock.querySelectorAll('select[name="certificateSize"]').forEach(select => {
+                        const certSize = select.value;
+                        if (CERTIFICATE_PRICES[certType] && CERTIFICATE_PRICES[certType][certSize]) {
+                            total += CERTIFICATE_PRICES[certType][certSize];
+                        }
+                    });
+                }
+
+                itemBlock.querySelectorAll('[name="itemOptions"]:checked').forEach(option => {
+                    total += OPTION_PRICES[option.value] || 0;
+                });
+            });
+            totalPriceEl.textContent = `¥${total.toLocaleString()}`;
+        }
+
+        function updateSummary(itemBlock) {
+            const itemSummaryEl = itemBlock.querySelector('.item-summary');
+            if (!itemSummaryEl) return;
+
+            const uniqueId = itemBlock.dataset.itemId;
+            const certType = itemBlock.querySelector(`input[name="certificateType-${uniqueId}"]:checked`)?.value;
+            const certSizes = Array.from(itemBlock.querySelectorAll('select[name="certificateSize"]')).map(s => s.value);
+            const itemTypes = Array.from(itemBlock.querySelectorAll('select[name="itemType"]')).map(s => s.value);
+            
+            const summaryParts = [
+                certType,
+                certSizes.join(', '),
+                itemTypes.join(', ')
+            ].filter(Boolean);
+
+            itemSummaryEl.textContent = summaryParts.join(' / ');
+        }
+
+        function updateConfirmationSummary() {
+            confirmationSummary.innerHTML = '';
+            
+            const customerInfoDiv = document.createElement('div');
+            customerInfoDiv.className = 'border-b pb-4';
+            customerInfoDiv.innerHTML = `<h3 class="font-bold text-lg mb-2">お客様情報</h3>
+                                         <p><strong>会社名（お名前）:</strong> ${document.getElementById('customerName').value}</p>
+                                         <p><strong>電話番号:</strong> ${document.getElementById('contactInfo').value}</p>
+                                         <p><strong>希望納期:</strong> ${document.getElementById('desiredDeliveryDate').value}</p>`;
+            confirmationSummary.appendChild(customerInfoDiv);
+
+            itemsContainer.querySelectorAll('.item-block').forEach((itemBlock, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'mt-4 border-b pb-4';
+                
+                const uniqueId = itemBlock.dataset.itemId;
+                const certType = itemBlock.querySelector(`input[name="certificateType-${uniqueId}"]:checked`)?.value || 'N/A';
+                const certSizes = Array.from(itemBlock.querySelectorAll('select[name="certificateSize"]')).map(s => s.value);
+                const itemTypes = Array.from(itemBlock.querySelectorAll('select[name="itemType"]')).map(s => s.value);
+                const itemNotes = itemBlock.querySelector('[name="itemNotes"]').value;
+                const options = Array.from(itemBlock.querySelectorAll('input[name="itemOptions"]:checked')).map(cb => cb.value);
+
+                itemDiv.innerHTML = `<h3 class="font-bold text-lg mb-2">商品 #${index + 1}</h3>
+                                     <p><strong>鑑定・鑑別:</strong> ${certType}</p>
+                                     <p><strong>証書サイズ:</strong> ${certSizes.join(', ')}</p>
+                                     <p><strong>アイテム種別:</strong> ${itemTypes.join(', ')}</p>
+                                     <p><strong>ご要望・備考:</strong> ${itemNotes || 'なし'}</p>
+                                     <p><strong>オプション:</strong> ${options.join(', ') || 'なし'}</p>`;
+                
+                const previewContainer = itemBlock.querySelector('.preview-container');
+                if (previewContainer && previewContainer.children.length > 0) {
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'mt-2 flex flex-wrap gap-2';
+                    previewContainer.querySelectorAll('img').forEach(img => {
+                        const newImg = document.createElement('img');
+                        newImg.src = img.src;
+                        newImg.className = 'w-24 h-24 object-cover rounded-md shadow-md';
+                        imageContainer.appendChild(newImg);
+                    });
+                    itemDiv.appendChild(imageContainer);
+                }
+                
+                confirmationSummary.appendChild(itemDiv);
+            });
+        }
+        
+        function goToStep(step) {
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+
+            stepIndicators.forEach((el, index) => {
+                const isCompleted = index < step;
+                el.classList.toggle('bg-blue-500', isCompleted);
+                el.classList.toggle('bg-gray-300', !isCompleted);
+                stepTexts[index].classList.toggle('text-blue-600', isCompleted);
+                stepTexts[index].classList.toggle('font-medium', isCompleted);
+                stepTexts[index].classList.toggle('text-gray-500', !isCompleted);
+            });
+            currentStep = step;
+        }
+
+        function previewImages(fileInput) {
+            const previewContainer = fileInput.closest('.accordion-content').querySelector('.preview-container');
+            previewContainer.innerHTML = '';
+            if (fileInput.files) {
+                Array.from(fileInput.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.className = 'w-32 h-32 object-cover rounded-md shadow-md';
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+        
+        // --- EVENT LISTENERS ---
+        // Step Navigation
+        nextStep1Btn.addEventListener('click', () => {
+            if (form.checkValidity()) {
+                goToStep(2);
+            } else {
+                form.reportValidity();
+            }
+        });
+        prevStep2Btn.addEventListener('click', () => goToStep(1));
+        nextStep2Btn.addEventListener('click', () => {
+            if (itemsContainer.children.length === 0) {
+                showMessage('商品を1つ以上追加してください。', 'error');
+                return;
+            }
+            updateConfirmationSummary();
+            goToStep(3);
+        });
+        prevStep3Btn.addEventListener('click', () => goToStep(2));
+        
+        // Add Item Button
+        addItemBtnTop.addEventListener('click', () => addItemBlock(true));
+        
+        // Dynamic listeners on the items container
+        itemsContainer.addEventListener('change', (e) => {
+            updateTotalPrice();
+            const itemBlock = e.target.closest('.item-block');
+            if (itemBlock) {
+                updateSummary(itemBlock);
+            }
+            if (e.target.matches('input[name="itemImage"]')) {
+                previewImages(e.target);
+            }
+        });
+
+        itemsContainer.addEventListener('click', (e) => {
+            const target = e.target;
+            const itemBlock = target.closest('.item-block');
+
+            if (target.closest('.remove-item-block-btn')) {
+                if (itemsContainer.children.length > 1) {
+                    itemBlock.remove();
+                    updateItemNumbers();
+                } else {
+                    showMessage('少なくとも1つの商品が必要です。', 'error');
+                }
+            }
+            else if (target.closest('.accordion-header')) {
+                const content = itemBlock.querySelector('.accordion-content');
+                const icon = itemBlock.querySelector('.accordion-icon');
+                const isOpening = !itemBlock.classList.contains('is-open');
+
+                itemsContainer.querySelectorAll('.item-block').forEach(block => {
+                    if (block !== itemBlock) {
+                        block.classList.remove('is-open');
+                        block.querySelector('.accordion-content').classList.remove('open');
+                        block.querySelector('.accordion-icon').classList.remove('rotate-180');
+                    }
+                });
+
+                itemBlock.classList.toggle('is-open');
+                content.classList.toggle('open');
+                icon.classList.toggle('rotate-180');
+                
+                if (isOpening) {
+                    updateSummary(itemBlock);
+                }
+            }
+            updateTotalPrice();
+            if(itemBlock) updateSummary(itemBlock);
+        });
+
+        // Drag and Drop Listeners
+        itemsContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) dropZone.classList.add('drag-active');
+        });
+        itemsContainer.addEventListener('dragleave', (e) => {
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) dropZone.classList.remove('drag-active');
+        });
+        itemsContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) {
+                dropZone.classList.remove('drag-active');
+                const fileInput = dropZone.querySelector('input[type="file"]');
+                fileInput.files = e.dataTransfer.files;
+                previewImages(fileInput);
+            }
+        });
+
+        // Form Submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showMessage('送信中...', 'info');
+            submitBtn.disabled = true;
+
+            async function uploadFileAndGetUrl(file) {
+                console.warn("File upload is not implemented. Using placeholder URL.");
+                return `https://example.com/uploads/${file.name}`;
+            }
+
+            try {
+                const orderResponse = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLES.ORDERS)}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fields: {
+                        '顧客名': form.customerName.value,
+                        '連絡先': form.contactInfo.value,
+                        '受付日': new Date().toISOString().split('T')[0],
+                        '希望納期': form.desiredDeliveryDate.value,
+                        '合計金額': parseInt(totalPriceEl.textContent.replace(/[¥,]/g, ''), 10),
+                        'ステータス': '受付済み',
+                    }})
+                });
+                if (!orderResponse.ok) throw new Error(`Airtable Order Error: ${await orderResponse.text()}`);
+                const newOrder = await orderResponse.json();
+                const orderId = newOrder.id;
+
+                const itemPromises = Array.from(itemsContainer.querySelectorAll('.item-block')).map(async (itemBlock) => {
+                    const uniqueId = itemBlock.dataset.itemId;
+                    
+                    const imageInput = itemBlock.querySelector('input[type="file"]');
+                    const attachmentUrls = await Promise.all(
+                        Array.from(imageInput.files).map(async file => ({ url: await uploadFileAndGetUrl(file) }))
+                    );
+
+                    const itemData = {
+                        '受付ID': [orderId],
+                        '商品種別': Array.from(itemBlock.querySelectorAll('[name="itemType"]')).map(s => s.value).join(', '),
+                        '備考': itemBlock.querySelector('[name="itemNotes"]').value,
+                        '写真': attachmentUrls.length > 0 ? attachmentUrls : undefined
+                    };
+                    const itemResponse = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLES.ITEMS)}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fields: itemData })
+                    });
+                    if (!itemResponse.ok) throw new Error(`Airtable Item Error: ${await itemResponse.text()}`);
+                    const newItem = await itemResponse.json();
+                    const itemId = newItem.id;
+
+                    const certType = itemBlock.querySelector(`input[name="certificateType-${uniqueId}"]:checked`)?.value;
+                    const options = Array.from(itemBlock.querySelectorAll('input[name="itemOptions"]:checked')).map(cb => cb.value);
+                    const certSizes = Array.from(itemBlock.querySelectorAll('select[name="certificateSize"]')).map(s => s.value);
+
+                    const certPromises = certSizes.map(async (size) => {
+                         const certData = {
+                            '商品ID': [itemId],
+                            '鑑定・鑑別': certType,
+                            '証書サイズ': size,
+                            'オプション': options.join(', '),
+                        };
+                        return fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLES.CERTIFICATES)}`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ fields: certData })
+                        });
+                    });
+                    await Promise.all(certPromises);
+                });
+
+                await Promise.all(itemPromises);
+                
+                showMessage('受付が完了しました！', 'success');
+                form.reset();
+                itemsContainer.innerHTML = '';
+                itemCounter = 0;
+                addItemBlock(true);
+                goToStep(1);
+                
+            } catch (error) {
+                console.error('Submission Error:', error);
+                showMessage(`エラーが発生しました: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            addItemBlock(true);
+            goToStep(1);
+        });
+
+    </script>
+</body>
+</html>
