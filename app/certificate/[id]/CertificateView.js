@@ -239,7 +239,7 @@ export default function CertificateView({ recordId }) {
       }
       .detail-item-value {
         text-align: left;
-        word-break: break-all; /* 長い単語でも強制的に改行 */
+        overflow-wrap: break-word; /* 単語の途中を避け、スペースなどで改行する */
       }
       .header-title {
         font-size: 1.25rem;
