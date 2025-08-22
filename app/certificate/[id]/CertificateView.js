@@ -268,7 +268,10 @@ export default function CertificateView({ recordId }) {
     @media (max-width: 768px) {
       .aigs-content {
         grid-template-columns: 1fr;
-        gap: 1.5rem; /* スマートフォンでは列間の余白を調整 */
+        gap: 1.5rem;
+      }
+      .aigs-item {
+        text-align: left; /* スマートフォンでは左揃えに */
       }
     }
     @media (max-width: 640px) {
@@ -335,22 +338,22 @@ export default function CertificateView({ recordId }) {
               <div style={{marginBottom: '1rem'}}>
                 <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={imageStyles} />
               </div>
-              <div style={activeTheme.item}>
+              <div style={activeTheme.item} className="aigs-item">
                 <span style={activeTheme.label}>{t.conclusion}</span>
                 <span style={activeTheme.conclusionValue}>{fields.Conclusion || 'N/A'}</span>
               </div>
-              <div style={activeTheme.item}>
+              <div style={activeTheme.item} className="aigs-item">
                 <span style={activeTheme.label}>{t.weight}</span>
                 <span style={activeTheme.value}>{fields.Weight || 'N/A'}</span>
               </div>
               {fields.SIdeStone && (
-                <div style={activeTheme.item}>
+                <div style={activeTheme.item} className="aigs-item">
                   <span style={activeTheme.label}>{t.sideStone}</span>
                   <span style={activeTheme.value}>{fields.SIdeStone}</span>
                 </div>
               )}
               {fields.Comment3 && (
-                <div style={activeTheme.item}>
+                <div style={activeTheme.item} className="aigs-item">
                   <span style={activeTheme.label}>{t.comment3}</span>
                   <span style={activeTheme.value}>{fields.Comment3}</span>
                 </div>
@@ -358,20 +361,20 @@ export default function CertificateView({ recordId }) {
             </div>
             {/* 右列 */}
             <div>
-              <div style={activeTheme.item}>
+              <div style={activeTheme.item} className="aigs-item">
                 <span style={activeTheme.label}>{t.color}</span>
                 <span style={activeTheme.value}>{fields.Color || 'N/A'}</span>
               </div>
-              <div style={activeTheme.item}>
+              <div style={activeTheme.item} className="aigs-item">
                 <span style={activeTheme.label}>{t.shapeCut}</span>
                 <span style={activeTheme.value}>{fields.Shape_Cut || 'N/A'}</span>
               </div>
-              <div style={activeTheme.item}>
+              <div style={activeTheme.item} className="aigs-item">
                 <span style={activeTheme.label}>{t.size}</span>
                 <span style={activeTheme.value}>{fields.Size || 'N/A'}</span>
               </div>
               {fields.Comment1 && (
-                <div style={activeTheme.item}>
+                <div style={activeTheme.item} className="aigs-item">
                   <span style={activeTheme.label}>{t.comment}</span>
                   <span style={activeTheme.value}>{fields.Comment1}</span>
                 </div>
