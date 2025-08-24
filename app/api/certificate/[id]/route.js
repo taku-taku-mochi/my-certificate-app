@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 // この関数が /api/certificate/[id] へのリクエストを処理します
-// 'export default' を削除し、'export async function GET' に変更
 export async function GET(request, { params }) {
   const recordId = params.id; // URLからIDを取得
   const { searchParams } = new URL(request.url);
@@ -39,7 +38,9 @@ export async function GET(request, { params }) {
       const fieldsToTranslate = {
         Conclusion: data.fields.Conclusion,
         Shape_Cut: data.fields.Shape_Cut,
-        'Comment1': data.fields['Comment1'],
+        Size: data.fields.Size, // ★★★ 翻訳対象に追加 ★★★
+        Color: data.fields.Color, // ★★★ 翻訳対象に追加 ★★★
+        Comment1: data.fields.Comment1,
         Weight: data.fields.Weight,
       };
 
@@ -64,11 +65,9 @@ export async function GET(request, { params }) {
           const geminiResult = await geminiResponse.json();
           try {
             const translatedText = geminiResult.candidates[0].content.parts[0].text;
-            // AIの応答からJSON部分だけを抽出する
             const jsonMatch = translatedText.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const translatedFields = JSON.parse(jsonMatch[0]);
-                // 翻訳された結果を元のデータにマージ
                 data.fields = { ...data.fields, ...translatedFields };
             } else {
                  console.error("AI response did not contain valid JSON.", translatedText);

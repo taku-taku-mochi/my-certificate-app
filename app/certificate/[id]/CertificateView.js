@@ -21,7 +21,7 @@ const translations = {
   },
   en: {
     title: 'Certificate Data',
-    certNo: 'Certificate No',
+    certNo: 'Report No',
     conclusion: 'Conclusion',
     weight: 'Weight (ct)',
     shapeCut: 'Shape & Cut',
@@ -49,49 +49,6 @@ const translations = {
   }
 };
 
-// --- 各デザインテーマのスタイル定義 ---
-const SERIF_FONT = "'Georgia', 'Times New Roman', serif";
-const SANS_SERIF_FONT = "'Helvetica Neue', Arial, sans-serif";
-
-// A案: ミニマリスト＆ラグジュアリー
-const themeAStyles = {
-  page: { backgroundColor: '#121212' },
-  card: { backgroundColor: '#1e1e1e', border: '1px solid #444', boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.07)', padding: '3rem', maxWidth: '640px', fontFamily: SERIF_FONT },
-  title: { color: '#e0e0e0', fontWeight: '300', letterSpacing: '0.15em', fontSize: '1.5rem' },
-  id: { color: '#888' },
-  label: { color: '#999' },
-  value: { color: '#f5f5f5' },
-  conclusionValue: { color: '#ffffff', fontSize: '1.5rem', fontWeight: '500' },
-  divider: { borderColor: '#444' },
-  imageShadow: { boxShadow: '5px 5px 20px rgba(255, 255, 255, 0.15)' }
-};
-
-// B案：クラシック＆オーセンティック
-const themeBStyles = {
-  page: { backgroundColor: '#fdfaee' },
-  card: { backgroundColor: '#ffffff', border: '8px double #c0a080', padding: '3rem', maxWidth: '560px', fontFamily: SERIF_FONT },
-  title: { color: '#5d4037', fontSize: '2rem', fontWeight: '600' },
-  id: { color: '#795548' },
-  label: { color: '#795548' },
-  value: { color: '#3e2723' },
-  conclusionValue: { color: '#5d4037', fontSize: '1.5rem' },
-  divider: { borderColor: '#d7ccc8' },
-  imageShadow: { boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)' }
-};
-
-// C案：デフォルト
-const themeCStyles = {
-  page: { backgroundColor: '#f1f5f9' },
-  card: { backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', maxWidth: '560px', fontFamily: SANS_SERIF_FONT },
-  title: { color: '#1f2937', fontSize: '1.5rem', fontWeight: 'bold' },
-  id: { color: '#6b7280' },
-  label: { color: '#4b5563' },
-  value: { color: '#1f2937' },
-  conclusionValue: { color: '#1f2937', fontSize: '1.2rem' },
-  divider: { borderColor: '#e5e7eb' },
-  imageShadow: { boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.15)' }
-};
-
 
 // --- 表示担当のコンポーネント ---
 export default function CertificateView({ recordId }) {
@@ -99,7 +56,6 @@ export default function CertificateView({ recordId }) {
   const [certificateData, setCertificateData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeTheme, setActiveTheme] = useState(themeCStyles);
 
   useEffect(() => {
     const getCertificateData = async (id, lang) => {
@@ -126,15 +82,6 @@ export default function CertificateView({ recordId }) {
         const data = await response.json();
         setCertificateData(data);
 
-        const theme = data.fields['Design Theme'];
-        if (theme === 'A') {
-          setActiveTheme(themeAStyles);
-        } else if (theme === 'B') {
-          setActiveTheme(themeBStyles);
-        } else {
-          setActiveTheme(themeCStyles);
-        }
-
       } catch (error) {
         console.error('Error in CertificateView:', error.message);
         setCertificateData(null);
@@ -156,62 +103,89 @@ export default function CertificateView({ recordId }) {
     alignItems: 'center',
     minHeight: '100vh',
     padding: '1rem',
-    transition: 'background-color 0.5s ease',
-    ...activeTheme.page,
+    backgroundColor: '#f1f5f9',
+    fontFamily: "'Helvetica Neue', Arial, sans-serif",
   };
 
+  // カードのスタイル（最初から強調した影）
   const cardStyles = {
     width: '100%',
     borderRadius: '0.5rem',
     padding: '2.5rem',
-    transition: 'all 0.5s ease',
-    ...activeTheme.card,
+    backgroundColor: '#ffffff',
+    boxShadow: '0 28px 56px -14px rgba(0,0,0,0.40), 0 14px 28px -12px rgba(0,0,0,0.28), 0 3px 10px rgba(0,0,0,0.14)', // ← 強調版を常時適用
+    maxWidth: '560px',
+    position: 'relative',
+    overflow: 'hidden',
   };
-  
+  // ウォーターマークのスタイル
+  const watermarkOuter = {
+    position: 'absolute',
+    top: '55%', // ★★★ 位置を調整 ★★★
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    fontSize: '20rem',
+    color: 'rgba(0, 51, 102, 0.02)',
+    zIndex: '1',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  };
+  const watermarkInner = {
+    position: 'absolute',
+    top: '55%', // ★★★ 位置を調整 ★★★
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    fontSize: '13rem', 
+    color: 'rgba(0, 51, 102, 0.03)',
+    zIndex: '1',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  };
+  // 言語切替ボタンのスタイル
   const langButtonContainerStyles = {
     display: 'flex',
     justifyContent: 'center',
     gap: '0.5rem',
     marginBottom: '1.5rem',
   };
-
+  // 言語切替ボタンのスタイル
   const langButtonStyles = (isActive) => ({
     padding: '0.25rem 0.75rem',
     border: `1px solid ${isActive ? '#3b82f6' : '#d1d5db'}`,
     borderRadius: '0.375rem',
     cursor: 'pointer',
     backgroundColor: isActive ? '#3b82f6' : 'transparent',
-    color: isActive ? '#ffffff' : activeTheme.label.color,
+    color: isActive ? '#ffffff' : '#4b5563',
     fontSize: '0.875rem',
     transition: 'all 0.2s ease-in-out',
   });
-  
+  // 汎用アイテムのスタイル
   const itemStyles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'baseline',
     padding: '1rem 0',
-    borderBottom: `1px solid ${activeTheme.divider.borderColor}`,
+    borderBottom: '1px solid #e5e7eb',
   };
-
+  // ラベルのスタイル
   const labelStyles = {
     flexShrink: 0,
     paddingRight: '1.5rem',
-    fontWeight: '600',
-    ...activeTheme.label,
+    fontWeight: '400',
+    color: 'rgba(81, 91, 106, 1)',
   };
-
+  // 値のスタイル
   const valueStyles = {
     textAlign: 'right',
     fontWeight: '500',
-    ...activeTheme.value,
+    color: 'rgba(36, 46, 60, 1)',
   };
-
+  // 結論の値のスタイル
   const conclusionValueStyles = {
       ...valueStyles,
-      ...activeTheme.conclusionValue,
+      fontSize: '1.2rem',
   };
-  
+  // エラーメッセージのスタイル
   const errorContainerStyles = {
     textAlign: 'center',
     padding: '2rem',
@@ -230,8 +204,8 @@ export default function CertificateView({ recordId }) {
   const responsiveStyles = `
     @media (max-width: 640px) {
       .certificate-card {
-        padding: 1.5rem;
-        font-size: 0.9rem;
+        padding: 1.2rem;
+        font-size: 0.8rem;
       }
       .detail-item {
         flex-direction: column;
@@ -274,56 +248,71 @@ export default function CertificateView({ recordId }) {
   const imageStyles = {
     width: '100%',
     height: 'auto',
-    borderRadius: '0.5rem',
-    ...activeTheme.imageShadow,
+    borderRadius: '1rem',
+    boxShadow: '18px 14px 36px -14px rgba(0,0,0,0.32), 0 14px 28px -12px rgba(0,0,0,0.24), 0 4px 12px rgba(0,0,0,0.12)', // ← 画像も強調を常時
   };
-
+  // 画像のスタイル
   return (
     <main style={pageStyles}>
       <style>{responsiveStyles}</style>
-      <div style={cardStyles} className="certificate-card">
-        <div style={langButtonContainerStyles}>
-          <button style={langButtonStyles(language === 'ja')} onClick={() => setLanguage('ja')}>日本語</button>
-          <button style={langButtonStyles(language === 'en')} onClick={() => setLanguage('en')}>English</button>
-          <button style={langButtonStyles(language === 'zh')} onClick={() => setLanguage('zh')}>中文</button>
+      <div
+        style={{ ...cardStyles }} // ← 動的切替を廃止
+        className="certificate-card"
+        // onMouseEnter={() => setElevated(true)}
+        // onMouseLeave={() => setElevated(false)}
+      >
+        <div>
+          <div style={watermarkOuter}>◇</div>
+          <div style={watermarkInner}>◇</div>
         </div>
-        <div style={{textAlign: 'center', marginBottom: '1.5rem'}}>
-          <h1 style={{...activeTheme.title}} className="header-title">{t.title}</h1>
-          <p style={{fontSize: '0.875rem', marginTop: '0.25rem', ...activeTheme.id}}>- {t.certNo}: {fields.CNo || 'N/A'} -</p>
-        </div>
+        <div style={{position: 'relative', zIndex: 2}}>
+          <div style={langButtonContainerStyles}>
+            <button style={langButtonStyles(language === 'ja')} onClick={() => setLanguage('ja')}>日本語</button>
+            <button style={langButtonStyles(language === 'en')} onClick={() => setLanguage('en')}>English</button>
+            <button style={langButtonStyles(language === 'zh')} onClick={() => setLanguage('zh')}>中文</button>
+          </div>
+          <div style={{textAlign: 'center', marginBottom: '1.5rem'}}>
+            <h1 style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937'}} className="header-title">{t.title}</h1>
+            <p style={{fontSize: '0.875rem', marginTop: '0.25rem', color: '#6b7280'}}>- {t.certNo}: {fields.CNo || 'N/A'} -</p>
+          </div>
 
-        <div style={{marginBottom: '1.5rem'}}>
-          <img src={imageUrl} alt={fields.Conclusion || 'Gemstone'} style={imageStyles} />
-        </div>
+          <div style={{marginBottom: '1.5rem'}}>
+            <img
+              src={imageUrl}
+              alt={fields.Conclusion || 'Gemstone'}
+              style={imageStyles} // ← 動的切替を廃止
+            />
+          </div>
 
-        <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-          <div style={itemStyles} className="detail-item">
-            <span style={labelStyles} className="detail-item-label">{t.conclusion}:</span>
-            <span style={conclusionValueStyles} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
-          </div>
-          <div style={itemStyles} className="detail-item">
-            <span style={labelStyles} className="detail-item-label">{t.color}:</span>
-            <span style={valueStyles} className="detail-item-value">{fields.Color || 'N/A'}</span>
-          </div>
-          <div style={itemStyles} className="detail-item">
-            <span style={labelStyles} className="detail-item-label">{t.shapeCut}:</span>
-            <span style={valueStyles} className="detail-item-value">{fields.Shape_Cut || 'N/A'}</span>
-          </div>
-          <div style={itemStyles} className="detail-item">
-            <span style={labelStyles} className="detail-item-label">{t.size}:</span>
-            <span style={valueStyles} className="detail-item-value">{fields.Size || 'N/A'}</span>
-          </div>
-          <div style={itemStyles} className="detail-item">
-            <span style={labelStyles} className="detail-item-label">{t.weight}:</span>
-            <span style={valueStyles} className="detail-item-value">{fields.Weight || 'N/A'}</span>
-          </div>
-          
-          {fields['Comment1'] && (
-            <div style={{paddingTop: '1rem'}} className="detail-item">
-              <span style={{fontWeight: '600', ...labelStyles}} className="detail-item-label">{t.comment}:</span>
-              <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...valueStyles}} className="detail-item-value">{fields['Comment1']}</p>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+            <div style={itemStyles} className="detail-item">
+              <span style={labelStyles} className="detail-item-label">{t.conclusion}:</span>
+              <span style={conclusionValueStyles} className="detail-item-value">{fields.Conclusion || 'N/A'}</span>
             </div>
-          )}
+            <div style={itemStyles} className="detail-item">
+              <span style={labelStyles} className="detail-item-label">{t.color}:</span>
+              <span style={valueStyles} className="detail-item-value">{fields.Color || 'N/A'}</span>
+            </div>
+            <div style={itemStyles} className="detail-item">
+              <span style={labelStyles} className="detail-item-label">{t.shapeCut}:</span>
+              <span style={valueStyles} className="detail-item-value">{fields.Shape_Cut || 'N/A'}</span>
+            </div>
+            <div style={itemStyles} className="detail-item">
+              <span style={labelStyles} className="detail-item-label">{t.size}:</span>
+              <span style={valueStyles} className="detail-item-value">{fields.Size || 'N/A'}</span>
+            </div>
+            <div style={itemStyles} className="detail-item">
+              <span style={labelStyles} className="detail-item-label">{t.weight}:</span>
+              <span style={valueStyles} className="detail-item-value">{fields.Weight || 'N/A'}</span>
+            </div>
+            
+            {fields['Comment1'] && (
+              <div style={{paddingTop: '1rem'}} className="detail-item">
+                <span style={{fontWeight: '600', ...labelStyles}} className="detail-item-label">{t.comment}:</span>
+                <p style={{marginTop: '0.5rem', lineHeight: '1.6', ...valueStyles}} className="detail-item-value">{fields['Comment1']}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>
